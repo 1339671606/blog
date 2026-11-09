@@ -1,0 +1,8 @@
+<div class="welcome-note-top"><span>一份可复用的笔记</span><span class="welcome-note-mark" aria-hidden="true">↗</span></div>
+<h2>写给未来的自己，<br>也写给遇到同样问题的人。</h2>
+<div class="welcome-workflow">
+    {{ range .Params.approach }}
+    <div class="welcome-step"><span class="welcome-step-dot" aria-hidden="true"></span><div><h3>{{ .title }}</h3><p>{{ .text }}</p></div></div>
+    {{ end }}
+</div>
+<a class="welcome-text-link" href="{{ "about/" | relURL }}">关于这个博客 <span aria-hidden="true">→</span></a>

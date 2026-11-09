@@ -1,0 +1,93 @@
+{{/* Project archive layout: wrapping taxonomy links and compact chronological rows. */}}
+{{ define "body-class" }}template-archives{{ end }}
+{{ define "main" }}
+{{- $pages := partial "helper/pages.html" .Site.Home -}}
+{{- $groups := $pages.GroupByDate "2006" -}}
+{{- $datedGroups := where $groups "Key" "ne" "0001" -}}
+{{- $sections := .Site.Params.mainSections | default (slice "posts") -}}
+<div class="archive-page">
+    <header class="archive-intro">
+        <p class="archive-overline">FIELD NOTES / ARCHIVE</p>
+        <div class="archive-headline">
+            <h1>{{ .Title }}</h1>
+            <span class="archive-total">{{ len $pages }} 篇笔记<span aria-hidden="true"> · </span>{{ len $datedGroups }} 个年份</span>
+        </div>
+        <p class="archive-description">按技术方向查找，沿时间回看。</p>
+    </header>
+
+    {{- with .Site.GetPage "/categories" -}}
+    {{- if .Pages -}}
+    <section class="archive-category-section" aria-labelledby="archive-category-title">
+        <div class="archive-section-label">
+            <h2 id="archive-category-title">技术分类</h2>
+            <a href="{{ .RelPermalink }}">全部分类 <span aria-hidden="true">→</span></a>
+        </div>
+        <nav class="archive-category-list" aria-label="按分类浏览">
+            {{- range .Pages.ByTitle -}}
+            {{- $count := len (where .RegularPages "Type" "in" $sections) -}}
+            <a class="archive-category" href="{{ .RelPermalink }}">
+                <span>{{ .LinkTitle }}</span><span class="archive-category-count" aria-label="{{ $count }} 篇笔记">{{ $count }}</span>
+            </a>
+            {{- end -}}
+        </nav>
+    </section>
+    {{- end -}}
+    {{- end -}}
+
+    {{- if gt (len $groups) 1 -}}
+    <nav class="archive-year-nav" aria-label="按年份跳转">
+        <span>年份</span>
+        {{- range $groups -}}
+        <a href="#{{ lower (replace .Key " " "-") }}">{{ if eq .Key "0001" }}未标注日期{{ else }}{{ .Key }}{{ end }}</a>
+        {{- end -}}
+    </nav>
+    {{- end -}}
+
+    <div class="archive-timeline">
+        {{- range $groups -}}
+        {{- $id := lower (replace .Key " " "-") -}}
+        {{- $label := .Key -}}
+        {{- if eq .Key "0001" -}}{{- $label = "未标注日期" -}}{{- end -}}
+        <section class="archive-year-group" id="{{ $id }}" aria-labelledby="archive-year-{{ $id }}">
+            <div class="archive-year-heading">
+                <h2 id="archive-year-{{ $id }}"><a href="#{{ $id }}">{{ $label }}</a></h2>
+                <span>{{ len .Pages }} 篇笔记</span>
+                <div aria-hidden="true"></div>
+            </div>
+            <ol class="archive-entry-list">
+                {{- range .Pages -}}
+                <li>
+                    <a class="archive-entry" href="{{ .RelPermalink }}">
+                        <div class="archive-entry-date">
+                            <span>{{ .Params.dateLabel | default "发布日期" }}</span>
+                            {{- if not .Date.IsZero -}}
+                            <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">{{ .Date.Format "2006-01-02" }}</time>
+                            {{- else -}}
+                            <span class="archive-date-missing">待补充</span>
+                            {{- end -}}
+                        </div>
+                        <div class="archive-entry-info">
+                            <h3>{{ .Title }}</h3>
+                            <div class="archive-entry-meta">
+                                {{- range first 1 (.GetTerms "categories") -}}<span class="archive-entry-category">{{ .LinkTitle }}</span>{{- end -}}
+                                {{- if .Draft -}}<span class="archive-draft">草稿</span>{{- end -}}
+                                <span>约 {{ .ReadingTime }} 分钟阅读</span>
+                            </div>
+                        </div>
+                        <span class="archive-entry-arrow" aria-hidden="true">↗</span>
+                    </a>
+                </li>
+                {{- end -}}
+            </ol>
+        </section>
+        {{- else -}}
+        <div class="archive-empty">
+            <h2>笔记正在整理中</h2>
+            <p>文章发布后，会按年份收录在这里。</p>
+            <a href="{{ .Site.Home.RelPermalink }}">返回首页 <span aria-hidden="true">→</span></a>
+        </div>
+        {{- end -}}
+    </div>
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}

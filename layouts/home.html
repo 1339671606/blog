@@ -1,0 +1,99 @@
+{{ define "body-class" }}template-welcome{{ end }}
+{{ define "main" }}
+{{- $postsURL := "posts/" | relURL -}}
+{{- $archiveURL := "archives/" | relURL -}}
+{{- $searchURL := "search/" | relURL -}}
+<div class="welcome-page">
+    <div class="welcome-heading-line">
+        <span>运维学习笔记</span>
+        <span class="welcome-heading-caption">FIELD NOTES / HOME</span>
+    </div>
+
+    <section class="welcome-hero" aria-label="欢迎介绍">
+        <div class="welcome-intro">
+            <p class="welcome-eyebrow"><span aria-hidden="true"></span>{{ .Params.hero.eyebrow }}</p>
+            <h1><span>{{ .Params.hero.title }}</span><span class="welcome-title-emphasis">{{ .Params.hero.emphasis }}</span></h1>
+            <p class="welcome-lead">{{ .Params.hero.description }}</p>
+            <div class="welcome-actions">
+                <a class="welcome-button welcome-button-primary" href="{{ $postsURL }}">浏览文章 <span aria-hidden="true">↗</span></a>
+                <a class="welcome-button welcome-button-secondary" href="{{ $archiveURL }}">浏览归档 <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="welcome-intro-footnote">
+                <span class="welcome-mini-line" aria-hidden="true"></span>
+                <span>从概念理解，到动手验证</span>
+            </div>
+        </div>
+
+        <aside class="welcome-note welcome-note-desktop" aria-label="笔记写作方式">
+            {{ partial "welcome/note" . }}
+        </aside>
+        <details class="welcome-note-mobile">
+            <summary>笔记如何整理</summary>
+            <div class="welcome-note">{{ partial "welcome/note" . }}</div>
+        </details>
+    </section>
+
+    <section class="welcome-topics-section" aria-labelledby="welcome-topics-title">
+        <div class="welcome-section-heading">
+            <div><p class="welcome-overline">EXPLORE</p><h2 id="welcome-topics-title">沿着问题，找到笔记</h2></div>
+            <p>选择一个方向，按分类浏览</p>
+        </div>
+        <div class="welcome-topics">
+            {{ range .Params.topics }}
+            {{- $term := $.Site.GetPage (printf "/categories/%s" (lower (replace .category " " "-"))) -}}
+            {{- if not $term -}}{{- errorf "Homepage category %q has no taxonomy page" .category -}}{{- end -}}
+            <a class="welcome-topic" href="{{ $term.RelPermalink }}">
+                <div class="welcome-topic-top"><span class="welcome-topic-label">{{ .label }}</span><span aria-hidden="true">↗</span></div>
+                <h3>{{ .title }}</h3>
+                <p>{{ .text }}</p>
+            </a>
+            {{ end }}
+        </div>
+    </section>
+
+    {{- $sections := .Site.Params.mainSections | default (slice "posts") -}}
+    {{- $excluded := .Params.excludePosts | default (slice) -}}
+    {{- $posts := slice -}}
+    {{- range .Site.RegularPages -}}
+        {{- if in $sections .Type -}}
+            {{- $filePath := "" -}}
+            {{- with .File -}}{{- $filePath = replace .Path "\\" "/" -}}{{- end -}}
+            {{- if not (in $excluded $filePath) -}}{{- $posts = $posts | append . -}}{{- end -}}
+        {{- end -}}
+    {{- end -}}
+    <section class="welcome-reading" aria-labelledby="welcome-reading-title">
+        <div class="welcome-reading-main">
+            <div class="welcome-section-heading">
+                <div><p class="welcome-overline">KEEP READING</p><h2 id="welcome-reading-title">从一篇笔记开始</h2></div>
+                <a class="welcome-text-link" href="{{ $postsURL }}">全部文章 <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="welcome-post-list">
+                {{ range first 2 (sort $posts "Date" "desc") }}
+                <a class="welcome-post" href="{{ .RelPermalink }}">
+                    <div>
+                        <span class="welcome-post-label">技术笔记</span>
+                        <h3>{{ .Title }}</h3>
+                        <p>{{ with .Description }}{{ . }}{{ else }}查看完整笔记与操作示例{{ end }}</p>
+                        <div class="welcome-post-meta">
+                            {{ if not .Date.IsZero }}<time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Params.dateLabel | default "发布日期" }}：{{ .Date.Format "2006-01-02" }}</time><span aria-hidden="true">·</span>{{ end }}
+                            <span>约 {{ .ReadingTime }} 分钟阅读</span>
+                        </div>
+                    </div>
+                    <span class="welcome-post-arrow" aria-hidden="true">↗</span>
+                </a>
+                {{ else }}
+                <div class="welcome-empty">笔记正在整理中，可以先了解这个博客，或通过归档浏览已有内容。</div>
+                {{ end }}
+            </div>
+        </div>
+        <aside class="welcome-find">
+            <span class="welcome-find-icon" aria-hidden="true">{{ partial "helper/icon" "search" }}</span>
+            <h2>带着问题来，<br>从关键词开始。</h2>
+            <p>想找某条命令、某个报错或一段配置？试试站内搜索。</p>
+            <a class="welcome-button welcome-button-secondary" href="{{ $searchURL }}">搜索笔记 <span aria-hidden="true">→</span></a>
+        </aside>
+    </section>
+
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}

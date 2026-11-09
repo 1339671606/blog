@@ -1,0 +1,82 @@
+{{/* Based on Stack v4.0.3 (3e123a3). Keep the unchanged rendering below in sync when upgrading the theme.
+Shared ./assets paths are relative to the Markdown source file, not its public URL.
+*/}}
+{{- $imageArgs := dict "Resources" .Page.Resources "Image" .Destination "Context" .Page -}}
+{{- $imageURL := urls.Parse .Destination -}}
+{{- $sharedImage := and (not $imageURL.IsAbs) (not $imageURL.Host) (or (strings.HasPrefix $imageURL.Path "./assets/") (strings.HasPrefix $imageURL.Path "assets/")) -}}
+{{- if $sharedImage -}}
+    {{- if not .Page.File -}}
+        {{- errorf "Shared image requires a Markdown source file: %q (%s)" .Destination .Position -}}
+    {{- else -}}
+        {{- $contentPath := path.Join .Page.File.Dir $imageURL.Path -}}
+        {{- if strings.HasPrefix $contentPath "../" -}}
+            {{- errorf "Shared image escapes content directory: %q (%s)" .Destination .Position -}}
+        {{- else -}}
+            {{/* Check each real file-system component case-sensitively, including on Windows. */}}
+            {{- $directory := "." -}}
+            {{- $exactPathExists := true -}}
+            {{- range (split (path.Join "content" $contentPath) "/") -}}
+                {{- $component := . -}}
+                {{- $found := false -}}
+                {{- range (os.ReadDir $directory) -}}
+                    {{- if eq .Name $component -}}{{- $found = true -}}{{- end -}}
+                {{- end -}}
+                {{- if not $found -}}
+                    {{- $exactPathExists = false -}}
+                    {{- break -}}
+                {{- end -}}
+                {{- $directory = path.Join $directory $component -}}
+            {{- end -}}
+            {{- if not $exactPathExists -}}
+                {{- errorf "Shared image missing or filename case mismatch: %q (%s)" .Destination .Position -}}
+            {{- else -}}
+                {{- $resourcePath := path.Join "shared-content" $contentPath -}}
+                {{- if not (resources.Get $resourcePath) -}}
+                    {{- errorf "Shared image is not mounted: %q (%s)" .Destination .Position -}}
+                {{- else -}}
+                    {{- $imageArgs = dict "Resources" resources "Image" $resourcePath "Context" .Page -}}
+                {{- end -}}
+            {{- end -}}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+{{- $image := partial "helper/image" $imageArgs -}}
+{{- if and $sharedImage $image.Resource -}}
+    {{- $permalink := $image.Permalink -}}
+    {{- with $imageURL.RawQuery -}}{{- $permalink = printf "%s?%s" $permalink . -}}{{- end -}}
+    {{- with $imageURL.EscapedFragment -}}{{- $permalink = printf "%s#%s" $permalink . -}}{{- end -}}
+    {{- $image = dict "Resource" $image.Resource "Permalink" $permalink "Width" $image.Width "Height" $image.Height -}}
+{{- end -}}
+
+{{- $alt := .PlainText | safeHTML -}}
+{{/* Keep alt text and explicit titles; only auto-generated filename captions are hidden. */}}
+{{- $autoCaption := and (not .Title) (gt (len (findRE "(?i)^(image|screenshot|屏幕截图|截图)[-_ ]?[0-9]{6,}(\\.[a-z0-9]+)?$" .PlainText)) 0) -}}
+{{- $title := .Title | markdownify -}}
+
+{{/* There are some types of images that don't have width and height attributes, such as SVG */}}
+{{- $galleryImage := and $image.Height $image.Width -}}
+
+{{- $attributes := dict -}}
+{{- if $galleryImage -}}
+    {{- $attributes = (dict 
+        "data-flex-grow" (div (mul $image.Width 100) $image.Height) 
+        "data-flex-basis" (printf "%dpx" (div (mul $image.Width 240) $image.Height))
+    ) -}}
+{{- end -}}
+
+{{ partial "helper/responsive-image" (dict 
+    "Resource" $image.Resource
+    "Widths" (cond .Page.Site.Params.ImageProcessing.Content.Enabled .Page.Site.Params.ImageProcessing.Content.Widths nil)
+    "Attributes" (merge $attributes (dict 
+        "src" $image.Permalink
+        "width" $image.Width
+        "height" $image.Height
+        "alt" $alt
+        "title" $title
+        "data-title-escaped" ($title | htmlEscape)
+        "data-caption-kind" (cond $autoCaption "filename" "text")
+        "class" (cond $galleryImage "gallery-image" "")
+        "loading" "lazy"
+        "sizes" "(max-width: 767px) calc(100vw - 30px), (max-width: 1023px) 700px, (max-width: 1279px) 950px, 1232px"
+    ))
+) }}

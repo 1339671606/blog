@@ -1,0 +1,51 @@
+/* Taxonomy navigation and dates use the existing Claude-like palette. */
+.article-header .article-meta {
+    flex-wrap: wrap;
+    row-gap: 9px;
+}
+.article-header .article-meta .inline-meta {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+.article-time--published,
+.article-time--updated {
+    font-variant-numeric: tabular-nums;
+}
+.article-updated {
+    color: var(--cl-control-text-color);
+    font-size: 1.2rem;
+}
+.right-sidebar .tagCloud-tags a {
+    border: 1px solid var(--cl-border-color);
+    border-radius: 8px;
+    background: var(--cl-bg-color);
+    color: var(--cl-control-text-color);
+    box-shadow: none;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+.right-sidebar .tagCloud-tags a:hover {
+    border-color: var(--cl-accent-color);
+    color: var(--cl-accent-color);
+}
+.taxonomy-empty {
+    border: 1px dashed var(--cl-border-color);
+    border-radius: 12px;
+    background: var(--cl-bg-color);
+    color: var(--cl-control-text-color);
+    padding: 28px;
+    font-size: 1.4rem;
+    line-height: 1.8;
+}
+.taxonomy-empty p { margin: 0 0 10px; }
+.taxonomy-empty a { color: var(--cl-accent-color); }
+@media (max-width: 767px) {
+    .article-updated { font-size: 1.1rem; }
+    .taxonomy-empty { padding: 22px; }
+}
+
+.article-header .article-meta .article-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.article-header .article-meta svg { flex-shrink: 0; }

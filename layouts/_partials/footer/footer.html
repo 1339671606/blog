@@ -1,0 +1,25 @@
+{{/* Shared two-line footer; keep the upstream theme intact for future updates. */}}
+{{- $github := "" -}}
+{{- range .Site.Menus.social -}}
+    {{- if eq .Identifier "github" -}}{{- $github = .URL -}}{{- end -}}
+{{- end -}}
+{{- $about := .Site.GetPage "/page/about" -}}
+<footer class="site-footer blog-footer" aria-label="站点页脚">
+    <p class="blog-footer-copyright">
+        &copy; {{ if and .Site.Params.footer.since (ne .Site.Params.footer.since (int (now.Format "2006"))) }}{{ .Site.Params.footer.since }}–{{ end }}{{ now.Format "2006" }} {{ default .Site.Title .Site.Copyright }}
+    </p>
+    <div class="blog-footer-links">
+        {{ if or $github $about }}
+        <nav class="blog-footer-nav" aria-label="页脚导航">
+            {{ with $github }}<a href="{{ . }}" target="_blank" rel="noopener noreferrer">GitHub</a>{{ end }}
+            {{ if and $github $about }}<span aria-hidden="true">·</span>{{ end }}
+            {{ with $about }}<a href="{{ .RelPermalink }}">关于</a>{{ end }}
+        </nav>
+        {{ end }}
+        <p class="blog-footer-credits" aria-label="构建工具与主题">
+            <a href="https://gohugo.io/" target="_blank" rel="noopener noreferrer">Hugo</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener noreferrer">Stack</a>
+        </p>
+    </div>
+</footer>

@@ -1,0 +1,10 @@
+{{/* Hide only a matching first H1 on article pages; preserve its original deep link. */}}
+{{- $duplicate := and .Page.IsPage (in .Page.Site.Params.mainSections .Page.Type) (eq .Ordinal 0) (eq .Level 1) (eq (strings.TrimSpace .PlainText) (strings.TrimSpace .Page.Title)) -}}
+{{- if $duplicate -}}
+<span id="{{ .Anchor }}" class="article-title-anchor" aria-hidden="true"></span>
+{{- else -}}
+<h{{ .Level }} id="{{ .Anchor }}"{{ with .Attributes.class }} class="{{ . }}"{{ end }}>
+    {{- if site.Params.Article.HeadingAnchor -}}<a href="#{{ .Anchor }}" class="header-anchor"></a>{{- end -}}
+    {{- .Text | safeHTML -}}
+</h{{ .Level }}>
+{{- end -}}

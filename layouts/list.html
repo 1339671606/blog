@@ -1,0 +1,3 @@
+{{ define "body-class" }}template-collection{{ end }}
+{{ define "main" }}{{ partial "listing/collection" . }}{{ end }}
+{{ define "right-sidebar" }}{{ partial "sidebar/right.html" (dict "Context" . "Scope" "homepage") }}{{ end }}

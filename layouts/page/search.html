@@ -1,0 +1,8 @@
+{{ define "body-class" }}template-search{{ end }}
+{{ define "main" }}
+<div class="utility-page">
+    <header class="utility-intro"><p class="collection-overline">FIELD NOTES / SEARCH</p><h1>搜索笔记</h1><p>查找命令、报错和操作步骤。</p></header>
+    {{ partial "search/panel" (dict "SearchPage" .) }}
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}

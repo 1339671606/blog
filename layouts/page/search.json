@@ -1,0 +1,12 @@
+{{- $pages := partial "helper/pages.html" .Site.Home -}}
+{{- $result := slice -}}
+{{- range $pages -}}
+    {{- $full := .Content | plainify | htmlUnescape -}}
+    {{/* Snippets prefer prose; the complete code text remains searchable in content. */}}
+    {{- $prose := .Content | replaceRE "(?is)<pre\\b[^>]*>.*?</pre>" " " | replaceRE "(?is)<h[1-6]\\b[^>]*>.*?</h[1-6]>" " " | plainify | htmlUnescape | replaceRE "\\s+" " " | strings.TrimSpace -}}
+    {{- $categories := slice -}}{{- range .GetTerms "categories" -}}{{- $categories = $categories | append .LinkTitle -}}{{- end -}}
+    {{- $tags := slice -}}{{- range .GetTerms "tags" -}}{{- $tags = $tags | append .LinkTitle -}}{{- end -}}
+    {{- $date := "" -}}{{- if not .Date.IsZero -}}{{- $date = .Date.Format "2006-01-02" -}}{{- end -}}
+    {{- $result = $result | append (dict "title" .Title "permalink" .RelPermalink "content" $full "prose" $prose "date" $date "dateLabel" (.Params.dateLabel | default "发布日期") "draft" .Draft "categories" $categories "tags" $tags) -}}
+{{- end -}}
+{{- $result | jsonify -}}

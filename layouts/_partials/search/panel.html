@@ -1,0 +1,19 @@
+{{- $searchPage := .SearchPage -}}
+{{- with $searchPage -}}
+<div class="blog-search" data-blog-search>
+    <form action="{{ .RelPermalink }}" class="search-form blog-search-form" data-json="{{ (.OutputFormats.Get "json").RelPermalink }}" role="search">
+        <p><label for="blog-search-query">搜索关键词</label><input id="blog-search-query" name="keyword" type="search" placeholder="输入文章标题、命令或报错信息" autocomplete="off" aria-describedby="blog-search-help"></p>
+        <button type="submit" title="搜索" aria-label="搜索">{{ partial "helper/icon" "search" }}</button>
+    </form>
+    <p class="blog-search-help" id="blog-search-help">可用空格分开多个关键词。命令和代码示例也能搜索。</p>
+    <p class="blog-search-status" role="status" aria-live="polite" data-search-status>输入关键词开始搜索。</p>
+    <div class="blog-search-results" data-search-results></div>
+    <section class="blog-search-empty" data-search-empty hidden>
+        <h2>没有找到相关笔记</h2><p>试试更短的关键词，或从分类和归档中查找。</p>
+        <div><a href="{{ "categories/" | relURL }}">浏览分类 →</a><a href="{{ "archives/" | relURL }}">查看归档 →</a></div>
+    </section>
+    <noscript><p>站内搜索需要启用 JavaScript，也可以通过分类和归档浏览文章。</p></noscript>
+</div>
+{{- $script := resources.Get "ts/blog-search.ts" | js.Build (dict "minify" hugo.IsProduction) | fingerprint -}}
+<script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}" defer></script>
+{{- end -}}

@@ -1,0 +1,22 @@
+{{/* Stack v4.0.3 widget adapted to include planned categories and handle empty draft-only sites. */}}
+{{- $context := .Context -}}
+{{- $taxonomyName := .Params.taxonomy -}}
+{{- $taxonomyPage := $context.Site.GetPage (printf "/%s" $taxonomyName) -}}
+{{- $widgetTitle := .Params.title -}}
+{{- $limit := .Params.limit | default 10 -}}
+{{- $icon := .Params.icon | default $taxonomyName -}}
+{{- $showLink := ne .Params.showLink false -}}
+{{- with $taxonomyPage -}}
+    {{- $terms := .Pages.ByTitle -}}
+    {{- with $terms -}}
+    <section class="widget tagCloud">
+        <div class="widget-icon">{{ partial "helper/icon" $icon }}</div>
+        <h2 class="widget-title section-title">
+            {{ if $showLink }}<a href="{{ $taxonomyPage.RelPermalink }}">{{ $widgetTitle }}</a>{{ else }}{{ $widgetTitle }}{{ end }}
+        </h2>
+        <div class="tagCloud-tags">
+            {{ range first $limit . }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}
+        </div>
+    </section>
+    {{- end -}}
+{{- end -}}

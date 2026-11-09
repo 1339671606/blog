@@ -1,0 +1,6 @@
+{{- if and .IsPage (in .Site.Params.mainSections .Type) -}}
+<nav class="reading-tools" aria-label="长文阅读工具" hidden>
+    <button type="button" data-reading-top aria-label="回到顶部"><span aria-hidden="true">↑</span><span>顶部</span></button>
+    {{ if .Scratch.Get "TOCEnabled" }}<button type="button" data-reading-toc aria-label="返回目录"><span aria-hidden="true">☷</span><span>目录</span></button>{{ end }}
+</nav>
+{{- end -}}

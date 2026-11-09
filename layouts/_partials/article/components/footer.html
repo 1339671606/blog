@@ -1,0 +1,10 @@
+{{/* Stack v4.0.3 footer; update dates are displayed with the article header. */}}
+<footer class="article-meta article-footer">
+    {{ partial "article/components/tags" . }}
+    {{ if and (.Site.Params.article.license.enabled) (not (eq .Params.license false)) }}
+    <section class="article-copyright inline-meta">
+        {{ partial "helper/icon" "copyright" }}
+        <span>{{ default .Site.Params.article.license.default .Params.license | markdownify }}</span>
+    </section>
+    {{ end }}
+</footer>

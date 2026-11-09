@@ -1,0 +1,79 @@
+baseURL: "http://localhost:1313/"
+title: "运维学习笔记"
+locale: "zh"
+timeZone: "Asia/Shanghai"
+defaultContentLanguage: "zh"
+hasCJKLanguage: true
+theme: "hugo-theme-stack"
+
+params:
+  favicon: "img/github-avatar.png"
+  dateFormat:
+    published: "2006-01-02"
+    lastUpdated: "2006-01-02"
+  sidebar:
+    compact: false
+    subtitle: "Linux 运维 · 数据库 · Elastic Stack · Shell"
+    avatar: "img/github-avatar.png"
+
+  colorScheme:
+    default: light
+    toggle: true
+  mainSections:
+    - posts
+  article:
+    toc: true
+  widgets:
+    homepage:
+      - type: categories
+        params:
+          icon: folder
+      - type: tag-cloud
+    page:
+      - type: toc
+  comments:
+    enabled: false
+
+# Explicit dates keep local and Actions builds consistent.
+frontmatter:
+  date: [date]
+  lastmod: [lastmod, date]
+  publishDate: [publishDate, date]
+taxonomies:
+  category: categories
+  tag: tags
+
+markup:
+  tableOfContents:
+    ordered: true
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+
+# Shared image folders stay next to Markdown; Hugo publishes only referenced resources.
+module:
+  mounts:
+    - source: content
+      target: content
+      files:
+        - '! **/assets/**'
+        - '**'
+    - source: assets
+      target: assets
+    - source: content
+      target: assets/shared-content
+      files:
+        - '**/assets/**'
+
+
+menus:
+  social:
+    - identifier: github
+      name: "GitHub"
+      url: "https://github.com/1339671606"
+      weight: 10
+      params:
+        icon: brand-github
+        newTab: true

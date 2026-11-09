@@ -1,0 +1,86 @@
+{{/* Based on Stack v4.0.3: label import dates and show explicit lastmod in the header. */}}
+{{- $IsList := .IsList -}}
+{{- $Page := .Page -}}
+<div class="article-details">
+    {{ if $Page.Params.categories }}
+    <header class="article-category">
+        {{ range ($Page.GetTerms "categories") }}
+            {{ $color := partial "helper/color-from-str" .LinkTitle }}
+            {{ $BackgroundColor := default $color.BackgroundColor .Params.style.background }}
+            {{ $TextColor := default $color.TextColor .Params.style.color }}
+            <a href="{{ .RelPermalink }}" style="background-color: {{ $BackgroundColor | safeCSS }}; color: {{ $TextColor | safeCSS }};">
+                {{ .LinkTitle }}
+            </a>
+        {{ end }}
+    </header>
+    {{ end }}
+
+    <div class="article-title-wrapper">
+        <h{{ if $IsList }}2{{ else }}1{{ end }} class="article-title">
+            <a href="{{ $Page.RelPermalink }}">
+                {{- $Page.Title -}}
+            </a>
+        </h{{ if $IsList }}2{{ else }}1{{ end }}>
+    
+        {{ with $Page.Params.description }}
+        <h3 class="article-subtitle">
+            {{ . }}
+        </h3>
+        {{ end }}
+    </div>
+
+    {{ $showReadingTime := $Page.Site.Params.article.readingTime }}
+    {{ if isset $Page.Params "readingtime" }}{{ $showReadingTime = $Page.Params.readingTime }}{{ end }}
+    {{ if not (in $Page.Site.Params.mainSections $Page.Type) }}{{ $showReadingTime = false }}{{ end }}
+    {{ $showDate := not $Page.Date.IsZero }}
+    {{ $showTime := or $showDate $showReadingTime }}
+    {{ $showTranslations := $Page.IsTranslated }}
+    {{ $showTags := and $Page.Site.Params.Article.List.ShowTags ($Page.GetTerms "tags") $IsList }}
+    
+    {{ if or $showTime $showTranslations $showTags }}
+    <footer class="article-meta">
+        {{ if $showTime }}
+            <div class="inline-meta">
+                {{ if $showDate }}<span class="article-meta-item">
+                    {{ partial "helper/icon" "date" }}
+                    <time class="article-time--published" datetime='{{ $Page.Date.Format "2006-01-02T15:04:05Z07:00" }}'>
+                        {{- $Page.Params.dateLabel | default "发布日期" -}}：{{- $Page.Date | time.Format $Page.Site.Params.dateFormat.published -}}
+                    </time>
+                </span>{{ end }}
+
+                {{ if $showReadingTime }}<span class="article-meta-item">
+                    {{ partial "helper/icon" "clock" }}
+                    <time class="article-time--reading">
+                        {{ T "article.readingTime" $Page.ReadingTime }}
+                    </time>
+                </span>{{ end }}
+            </div>
+        {{ end }}
+
+        {{ if and (not $IsList) $Page.Params.lastmod (not $Page.Lastmod.IsZero) }}
+            <div class="inline-meta article-updated">
+                {{ partial "helper/icon" "clock" }}
+                <time class="article-time--updated" datetime="{{ $Page.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">最后更新：{{ $Page.Lastmod | time.Format $Page.Site.Params.dateFormat.lastUpdated }}</time>
+            </div>
+        {{ end }}
+
+        {{ if $showTranslations }}
+            <div class="inline-meta">
+                {{ partial "helper/icon" "language" }}
+                {{ range $Page.Translations }}
+                    <a href="{{ .RelPermalink }}" class="link">{{ .Language.Label }}</a>
+                {{ end }}
+            </div>
+        {{ end }}
+
+        {{ if $showTags }}
+            <div class="article-tags inline-meta">
+                {{ partial "helper/icon" "tag" }}
+                {{ range ($Page.GetTerms "tags") }}
+                    <a href="{{ .RelPermalink }}" class="link">{{ .LinkTitle }}</a>
+                {{ end }}
+            </div>
+        {{ end }}
+    </footer>
+    {{ end }}
+</div>

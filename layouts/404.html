@@ -1,0 +1,12 @@
+{{ define "body-class" }}template-notfound{{ end }}
+{{ define "main" }}
+<div class="utility-page">
+    <section class="notfound-intro">
+        <p class="collection-overline">404 / PAGE NOT FOUND</p><h1>页面暂时找不到</h1>
+        <p>链接可能已经变更。你可以返回首页、浏览文章，或在下面搜索笔记。</p>
+        <div class="utility-actions"><a class="utility-button utility-button-primary" href="{{ .Site.Home.RelPermalink }}">返回首页 →</a><a class="utility-button" href="{{ "posts/" | relURL }}">浏览文章 →</a></div>
+    </section>
+    {{ range first 1 (where .Site.RegularPages "Layout" "search") }}{{ partial "search/panel" (dict "SearchPage" .) }}{{ end }}
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}
