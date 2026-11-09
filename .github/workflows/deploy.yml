@@ -1,0 +1,97 @@
+﻿name: Deploy Hugo to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+env:
+  HUGO_VERSION: '0.169.0'
+  HUGO_ENVIRONMENT: production
+  TZ: Asia/Shanghai
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - name: Checkout source and theme
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Read Pages address
+        id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Install Hugo Extended
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive="hugo_extended_${HUGO_VERSION}_linux-amd64.tar.gz"
+          release="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}"
+          curl -fsSL --retry 3 "$release/$archive" -o "$archive"
+          curl -fsSL --retry 3 "$release/hugo_${HUGO_VERSION}_checksums.txt" -o checksums.txt
+          sha256sum --check --ignore-missing checksums.txt
+          mkdir -p hugo-bin
+          tar -xzf "$archive" -C hugo-bin
+          echo "$RUNNER_TEMP/hugo-bin" >> "$GITHUB_PATH"
+
+      - name: Build and check shared image paths
+        env:
+          PAGES_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          hugo version
+          hugo --gc --minify --baseURL "$PAGES_BASE_URL/"
+
+      - name: Check published website size
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path("public")
+          if not (root / "index.html").is_file():
+              raise SystemExit("Missing public/index.html")
+          size = sum(p.stat().st_size for p in root.rglob("*") if p.is_file())
+          print(f"Published website size: {size / 1_000_000:.2f} MB")
+          if size >= 1_000_000_000:
+              print("::error::Published website reaches the 1 GB size guard.")
+              raise SystemExit(1)
+          if size >= 800_000_000:
+              print("::warning::Published website reaches the internal 800 MB reminder.")
+          PY
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+          retention-days: 1
+          include-hidden-files: false
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+
