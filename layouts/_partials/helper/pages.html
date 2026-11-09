@@ -1,0 +1,13 @@
+{{/* Article sections include notes from every nested directory. */}}
+{{- $pages := .Pages -}}
+{{- if .IsHome -}}
+    {{- $pages = where .Site.RegularPages "Type" "in" .Site.Params.mainSections -}}
+{{- else if eq .Kind "section" -}}
+    {{- $pages = .RegularPagesRecursive -}}
+{{- else if or (eq .Kind "taxonomy") (eq .Kind "term") -}}
+    {{- $subsections := .Sections -}}
+    {{- $pages = .Pages | complement $subsections -}}
+    {{- if eq (len $pages) 0 -}}{{- $pages = $subsections -}}{{- end -}}
+{{- end -}}
+{{- $pages = partial "helper/pages-sort.html" (dict "Pages" $pages "Context" .) -}}
+{{- return $pages -}}

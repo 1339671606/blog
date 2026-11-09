@@ -9,19 +9,19 @@
 {{- $pages := partial "helper/pages.html" . -}}
 <div class="collection-page">
     <header class="collection-intro">
-        {{ if $isTerm }}<a class="collection-breadcrumb" href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }} <span aria-hidden="true">/</span></a>{{ else }}<p class="collection-overline">{{ $overline }}</p>{{ end }}
+        {{ if or $isTerm (and (eq .Kind "section") (eq .Parent.Kind "section")) }}<a class="collection-breadcrumb" href="{{ .Parent.RelPermalink }}">{{ .Parent.Title }} <span aria-hidden="true">/</span></a>{{ else }}<p class="collection-overline">{{ $overline }}</p>{{ end }}
         <div class="collection-headline"><h1>{{ .Title }}</h1><span class="collection-total">{{ len $pages }} {{ $unit }}</span></div>
         {{ with .Params.description }}<p class="collection-description">{{ . }}</p>{{ end }}
     </header>
-    {{- $subsections := .Sections -}}
-    {{- if and (not $isTaxonomy) (not $isTerm) (ne $pages $subsections) -}}
-        {{ with $subsections }}
-        <nav class="collection-subsections" aria-label="子分类">
-            {{ range . }}<a href="{{ .RelPermalink }}">{{ .Title }} <span aria-hidden="true">→</span></a>{{ end }}
+    {{- if eq .Kind "section" -}}
+        {{ with .Sections }}
+        <nav class="collection-subsections" aria-label="按目录浏览">
+            {{ range .ByWeight }}<a href="{{ .RelPermalink }}">{{ .Title }} <span class="collection-count">{{ len .RegularPagesRecursive }} 篇</span> <span aria-hidden="true">→</span></a>{{ end }}
         </nav>
         {{ end }}
     {{- end -}}
     {{- $paginator := partial "helper/paginator.html" . -}}
+
     {{- if $paginator.Pages -}}
         {{ if $isTaxonomy }}
         <section class="collection-term-grid" aria-label="{{ .Title }}">
