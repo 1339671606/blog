@@ -4,7 +4,9 @@
     {{- $pages = where .Site.RegularPages "Type" "in" .Site.Params.mainSections -}}
 {{- else if eq .Kind "section" -}}
     {{- $pages = .RegularPagesRecursive -}}
-{{- else if or (eq .Kind "taxonomy") (eq .Kind "term") -}}
+{{- else if eq .Kind "term" -}}
+    {{- $pages = where .Pages "Kind" "page" -}}
+{{- else if eq .Kind "taxonomy" -}}
     {{- $subsections := .Sections -}}
     {{- $pages = .Pages | complement $subsections -}}
     {{- if eq (len $pages) 0 -}}{{- $pages = $subsections -}}{{- end -}}

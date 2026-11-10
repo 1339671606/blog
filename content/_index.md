@@ -1,6 +1,6 @@
 ---
-title: "运维学习笔记"
-description: "Linux 运维、数据库、Elastic Stack 与 Shell 实践笔记"
+title: "proli的学习笔记"
+description: "前端、Linux、数据库与 Shell 的学习和实践笔记"
 aliases:
   - "/welcome/"
 toc: false
@@ -14,9 +14,9 @@ menu:
       icon: home
 hero:
   eyebrow: "欢迎来到我的技术笔记"
-  title: "记录运维实践，"
+  title: "记录学习与实践，"
   emphasis: "把问题写清楚。"
-  description: "围绕 Linux、数据库、Elastic Stack 与 Shell，记录部署步骤、故障现场，以及可复现的解决办法。"
+  description: "从前端到 Linux，从数据库到 Shell，记录理解过程、动手实践，以及解决问题的办法。"
 approach:
   - title: "先讲场景"
     text: "说明环境、版本与问题现象"

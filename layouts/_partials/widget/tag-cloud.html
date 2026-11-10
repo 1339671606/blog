@@ -1,0 +1,2 @@
+{{ $params := merge (dict "taxonomy" "tags" "title" "标签" "icon" "tag") .Params }}
+{{ partial "widget/taxonomy" (dict "Context" .Context "Params" $params) }}

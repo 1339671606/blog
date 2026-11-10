@@ -1,0 +1,21 @@
+{{ define "body-class" }}template-about{{ end }}
+{{ define "main" }}
+<div class="about-page">
+    <header class="about-intro">
+        <p class="collection-overline">FIELD NOTES / ABOUT</p>
+        <h1>你好，我是 <span>proli</span>。</h1>
+        <p class="about-lead">把遇到的问题，<br>整理成下次用得上的答案。</p>
+        <div class="about-topics" aria-label="笔记方向"><span>前端</span><span>Linux</span><span>数据库</span><span>Shell</span></div>
+    </header>
+    <div class="about-grid">
+        <article class="about-story" aria-label="关于这份笔记">{{ .Content }}</article>
+        <aside class="about-practice" aria-labelledby="about-practice-title">
+            <span class="about-practice-icon" aria-hidden="true">{{ partial "helper/icon" "user" }}</span>
+            <h2 id="about-practice-title">一篇笔记，<br>尽量把这三件事说清楚。</h2>
+            <dl>{{ range .Site.Home.Params.approach }}<div><dt>{{ .title }}</dt><dd>{{ .text }}</dd></div>{{ end }}</dl>
+        </aside>
+    </div>
+    <nav class="about-links" aria-label="继续浏览"><a href="{{ "posts/" | relURL }}">阅读笔记 <span aria-hidden="true">↗</span></a><a href="{{ "categories/" | relURL }}">按分类探索 <span aria-hidden="true">→</span></a>{{ range .Site.Menus.social }}{{ if eq .Identifier "github" }}<a href="{{ .URL }}" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>{{ end }}{{ end }}</nav>
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}

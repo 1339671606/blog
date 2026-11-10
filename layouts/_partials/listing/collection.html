@@ -27,7 +27,7 @@
         <section class="collection-term-grid" aria-label="{{ .Title }}">
             {{ range $paginator.Pages }}
             <a class="collection-term-card" href="{{ .RelPermalink }}">
-                <div class="collection-term-top"><h2>{{ .Title }}</h2><span class="collection-count">{{ len .RegularPages }} 篇笔记</span></div>
+                <div class="collection-term-top"><h2>{{ .Title }}</h2><span class="collection-count">{{ len (where .RegularPages "Kind" "page") }} 篇笔记</span></div>
                 {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
                 <span class="collection-term-action">浏览笔记 <span aria-hidden="true">→</span></span>
             </a>

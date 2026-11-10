@@ -1,5 +1,5 @@
 baseURL: "https://1339671606.github.io/blog/"
-title: "运维学习笔记"
+title: "proli的学习笔记"
 locale: "zh"
 timeZone: "Asia/Shanghai"
 defaultContentLanguage: "zh"
@@ -13,7 +13,7 @@ params:
     lastUpdated: "2006-01-02"
   sidebar:
     compact: false
-    subtitle: "Linux 运维 · 数据库 · Elastic Stack · Shell"
+    subtitle: "前端 · Linux · 数据库 · Shell"
     avatar: "img/github-avatar.png"
 
   colorScheme:

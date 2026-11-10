@@ -1,3 +1,16 @@
-{{ define "body-class" }}template-collection{{ end }}
-{{ define "main" }}{{ partial "listing/collection" . }}{{ end }}
-{{ define "right-sidebar" }}{{ partial "sidebar/right.html" (dict "Context" . "Scope" "homepage") }}{{ end }}
+{{ define "body-class" }}template-collection{{ if and (eq .Kind "taxonomy") (eq .Data.Plural "categories") }} template-taxonomy-hub{{ end }}{{ end }}
+{{ define "main" }}
+    {{ if and (eq .Kind "taxonomy") (eq .Data.Plural "categories") }}
+        {{ partial "listing/taxonomy-hub" . }}
+    {{ else if and (eq .Kind "taxonomy") (eq .Data.Plural "tags") }}
+        <div class="utility-page"><header class="utility-intro"><h1>分类与标签</h1><p>分类与标签已经合并到同一页。</p></header><a class="utility-button" href="{{ "categories/" | relURL }}#tags">查看分类与标签 →</a></div>
+        {{ partial "footer/footer" . }}
+    {{ else }}
+        {{ partial "listing/collection" . }}
+    {{ end }}
+{{ end }}
+{{ define "right-sidebar" }}
+    {{ if not (and (eq .Kind "taxonomy") (in (slice "categories" "tags") .Data.Plural)) }}
+        {{ partial "sidebar/right.html" (dict "Context" . "Scope" "homepage") }}
+    {{ end }}
+{{ end }}

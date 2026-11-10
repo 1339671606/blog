@@ -6,13 +6,16 @@
 {{- $limit := .Params.limit | default 10 -}}
 {{- $icon := .Params.icon | default $taxonomyName -}}
 {{- $showLink := ne .Params.showLink false -}}
+{{- $taxonomyURL := "" -}}
+{{- with $taxonomyPage -}}{{- $taxonomyURL = .RelPermalink -}}{{- end -}}
+{{- if eq $taxonomyName "tags" -}}{{- $taxonomyURL = printf "%s#tags" ("categories/" | relURL) -}}{{- end -}}
 {{- with $taxonomyPage -}}
     {{- $terms := .Pages.ByTitle -}}
     {{- with $terms -}}
     <section class="widget tagCloud">
         <div class="widget-icon">{{ partial "helper/icon" $icon }}</div>
         <h2 class="widget-title section-title">
-            {{ if $showLink }}<a href="{{ $taxonomyPage.RelPermalink }}">{{ $widgetTitle }}</a>{{ else }}{{ $widgetTitle }}{{ end }}
+            {{ if $showLink }}<a href="{{ $taxonomyURL }}">{{ $widgetTitle }}</a>{{ else }}{{ $widgetTitle }}{{ end }}
         </h2>
         <div class="tagCloud-tags">
             {{ range first $limit . }}<a href="{{ .RelPermalink }}">{{ .Title }}</a>{{ end }}

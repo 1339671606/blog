@@ -24,7 +24,7 @@
         </div>
         <nav class="archive-category-list" aria-label="按分类浏览">
             {{- range .Pages.ByTitle -}}
-            {{- $count := len (where .RegularPages "Type" "in" $sections) -}}
+            {{- $count := len (where (where .RegularPages "Kind" "page") "Type" "in" $sections) -}}
             <a class="archive-category" href="{{ .RelPermalink }}">
                 <span>{{ .LinkTitle }}</span><span class="archive-category-count" aria-label="{{ $count }} 篇笔记">{{ $count }}</span>
             </a>

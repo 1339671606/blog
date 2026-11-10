@@ -1,0 +1,28 @@
+{{- $categories := partial "helper/pages.html" . -}}
+{{- $tags := (.Site.GetPage "/tags").Pages.ByTitle -}}
+<div class="taxonomy-hub">
+    <header class="collection-intro">
+        <p class="collection-overline">FIELD NOTES / EXPLORE</p>
+        <div class="collection-headline"><h1>{{ .Title }}</h1><span class="collection-total">{{ len $categories }} 个分类 · {{ len $tags }} 个标签</span></div>
+        <p class="collection-description">按技术方向浏览，或从一个关键词开始。</p>
+    </header>
+    <div class="taxonomy-hub-grid">
+        <section class="collection-term-grid" aria-label="分类列表">
+            {{ range $categories }}
+            <a class="collection-term-card" href="{{ .RelPermalink }}">
+                <div class="collection-term-top"><h2>{{ .Title }}</h2><span class="collection-count">{{ len (where .RegularPages "Kind" "page") }} 篇笔记</span></div>
+                {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+                <span class="collection-term-action">浏览笔记 <span aria-hidden="true">→</span></span>
+            </a>
+            {{ end }}
+        </section>
+        <aside class="taxonomy-tags" id="tags" aria-labelledby="taxonomy-tags-title">
+            <div class="taxonomy-tags-heading"><span aria-hidden="true">{{ partial "helper/icon" "tag" }}</span><h2 id="taxonomy-tags-title">标签</h2><span class="collection-count">{{ len $tags }}</span></div>
+            <p>按工具、知识点与问题查找笔记。</p>
+            <div class="taxonomy-tag-list">
+                {{ range $tags }}<a href="{{ .RelPermalink }}"><span>{{ .Title }}</span><span class="taxonomy-tag-count" aria-label="{{ len (where .RegularPages "Kind" "page") }} 篇笔记">{{ len (where .RegularPages "Kind" "page") }}</span></a>{{ else }}<p>文章添加标签后，会自动汇总到这里。</p>{{ end }}
+            </div>
+        </aside>
+    </div>
+</div>
+{{ partial "footer/footer" . }}
