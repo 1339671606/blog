@@ -1,0 +1,30 @@
+{{ define "body-class" }}template-arrival{{ end }}
+{{ define "left-sidebar" }}<span hidden aria-hidden="true"></span>{{ end }}
+{{ define "main" }}
+{{- $posts := partial "helper/pages.html" .Site.Home -}}
+{{- $avatar := partial "helper/image" (dict "Image" .Site.Params.sidebar.avatar "Resources" resources "Context" .) -}}
+<div class="arrival-shell">
+    <header class="arrival-header">
+        <a class="arrival-brand" href="{{ .Site.Home.RelPermalink }}">{{ .Site.Title }}</a>
+        {{ partial "controls/scheme-toggle" . }}
+    </header>
+    <div class="arrival-stage">
+        <section class="arrival-intro" aria-labelledby="arrival-title">
+            <div class="arrival-identity">{{ with $avatar }}<img src="{{ .Permalink }}" width="72" height="72" alt="proli 的头像">{{ end }}<div><span class="arrival-kicker">PROLI / FIELD NOTES</span><p>很高兴，在这里遇见你</p></div></div>
+            <h1 id="arrival-title">你好，<br>我是 <em>proli</em>。</h1>
+            <p class="arrival-motto">折腾一点技术，留下几页笔记。</p>
+            <p class="arrival-description">从前端到 Linux，从数据库到 Shell。<br>把学到的知识和遇到的问题，慢慢写清楚。</p>
+            <div class="arrival-actions"><a class="arrival-primary" href="{{ .Site.Home.RelPermalink }}">进入博客 <span aria-hidden="true">→</span></a><a class="arrival-secondary" href="{{ "about/" | relURL }}">认识一下我 <span aria-hidden="true">↗</span></a></div>
+            {{ range .Site.Menus.social }}{{ if eq .Identifier "github" }}<a class="arrival-social" href="{{ .URL }}" target="_blank" rel="noopener noreferrer">{{ partial "helper/icon" "brand-github" }}<span>GitHub</span><span aria-hidden="true">↗</span></a>{{ end }}{{ end }}
+        </section>
+        <aside class="arrival-notebook" aria-label="从一篇笔记开始">
+            <div class="arrival-paper">
+                <div class="arrival-paper-heading"><span>随手翻开一页</span><span aria-hidden="true">01</span></div>
+                <p class="arrival-paper-quote">理解一点，<br>动手一点，<br><em>再记下一点。</em></p>
+                {{ range first 1 ($posts.ByDate.Reverse) }}<a class="arrival-note" href="{{ .RelPermalink }}"><span class="arrival-note-label">从这篇开始</span><h2>{{ .Title }}</h2><span class="arrival-note-meta">约 {{ .ReadingTime }} 分钟阅读 <span aria-hidden="true">↗</span></span></a>{{ else }}<a class="arrival-note" href="{{ "posts/" | relURL }}">浏览笔记 →</a>{{ end }}
+            </div>
+        </aside>
+    </div>
+    <footer class="arrival-footer"><span>&copy; {{ now.Format "2006" }} proli</span><span>{{ len $posts }} 篇公开笔记 · 持续整理中</span></footer>
+</div>
+{{ end }}

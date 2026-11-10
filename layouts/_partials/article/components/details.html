@@ -2,6 +2,13 @@
 {{- $IsList := .IsList -}}
 {{- $Page := .Page -}}
 <div class="article-details">
+    {{ if and (not $IsList) (in $Page.Site.Params.mainSections $Page.Type) }}
+    <div class="article-reader-toolbar">
+        <button type="button" class="reader-mode-toggle" data-reader-toggle data-reader-key="{{ printf "proli:%s:reader-mode:v1" $Page.Site.Home.RelPermalink }}" aria-controls="site-navigation" aria-pressed="false" title="收起左侧导航，扩大正文">
+            <span aria-hidden="true">{{ partial "helper/icon" "reader" }}</span><span data-reader-label>沉浸阅读</span>
+        </button>
+    </div>
+    {{ end }}
     {{ if $Page.Params.categories }}
     <header class="article-category">
         {{ range ($Page.GetTerms "categories") }}

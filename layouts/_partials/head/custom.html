@@ -3,3 +3,33 @@
 <meta name="robots" content="noindex">
 <meta http-equiv="refresh" content="0; url={{ "categories/" | relURL }}#tags">
 {{ end }}
+
+{{/* Only the home page can introduce a first visit; article deep links stay direct. */}}
+{{- $homeURL := .Site.Home.RelPermalink -}}
+{{- if or .IsHome .Params.arrival -}}
+<script>
+(function () {
+    const key = {{ printf "proli:%s:welcome-seen:v1" $homeURL }};
+    try {
+        {{ if .Params.arrival }}
+        localStorage.setItem(key, "1");
+        {{ else }}
+        if (localStorage.getItem(key) !== "1") {
+            location.replace({{ "welcome/" | relURL }});
+        }
+        {{ end }}
+    } catch (_) { /* Storage unavailable: keep the requested page accessible. */ }
+})();
+</script>
+{{- end -}}
+{{- if and .IsPage (in .Site.Params.mainSections .Type) -}}
+<script>
+(function () {
+    try {
+        if (localStorage.getItem({{ printf "proli:%s:reader-mode:v1" $homeURL }}) === "focus") {
+            document.documentElement.dataset.readerMode = "focus";
+        }
+    } catch (_) { }
+})();
+</script>
+{{- end -}}

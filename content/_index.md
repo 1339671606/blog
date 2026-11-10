@@ -1,8 +1,6 @@
 ---
 title: "proli的学习笔记"
 description: "前端、Linux、数据库与 Shell 的学习和实践笔记"
-aliases:
-  - "/welcome/"
 toc: false
 comments: false
 menu:
