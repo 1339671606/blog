@@ -77,9 +77,13 @@ function setupReaderMode() {
 function setupSchemeButton() {
     const button = document.querySelector<HTMLButtonElement>("button#dark-mode-toggle");
     if (!button) return;
+    const visibleLabel = button.querySelector<HTMLElement>(".scheme-toggle-label");
     const sync = () => {
         const dark = document.documentElement.dataset.scheme === "dark";
-        const label = dark ? "切换为浅色模式" : "切换为深色模式";
+        const label = dark ? "切换为浅色模式" : "切换为暗色模式";
+        if (visibleLabel) {
+            visibleLabel.textContent = dark ? "浅色模式" : "暗色模式";
+        }
         button.setAttribute("aria-pressed", String(dark));
         button.setAttribute("aria-label", label);
         button.title = label;

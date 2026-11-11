@@ -428,6 +428,31 @@ body {
     box-shadow: var(--shadow-l1);
 }
 
+.toc-widget {
+    .widget--toc {
+        overflow: hidden;
+    }
+
+    .toc-widget-title {
+        margin: 0;
+        padding: 17px 20px;
+        border-bottom: 1px solid var(--cl-border-color);
+        background: var(--cl-quote-bg-color);
+        color: var(--cl-heading-color);
+        font-family: var(--cl-font-body);
+        font-size: 1.9rem;
+        font-weight: 600;
+        line-height: 1.5;
+        letter-spacing: 0.12em;
+        text-align: center;
+    }
+
+    .toc-nav {
+        font-size: 1.5rem;
+        line-height: 1.6;
+    }
+}
+
 .toc-nav {
     font-family: var(--cl-font-ui);
     font-size: 1.4rem;

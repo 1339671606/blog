@@ -1,10 +1,9 @@
-{{/* Project override based on Stack v4.0.3: keep the title and hide the decorative hash icon. */}}
+{{/* Keep the title within the card while Stack handles numbering and scroll tracking. */}}
 {{ if (.Context.Scratch.Get "TOCEnabled") }}
-    <section class="widget archives">
-        <h2 class="widget-title section-title">{{ T "article.tableOfContents" }}</h2>
-        
+    <section class="widget archives toc-widget" aria-labelledby="toc-widget-title">
         <div class="widget--toc">
-            <nav class="toc-nav" id="TableOfContents">
+            <h2 class="widget-title section-title toc-widget-title" id="toc-widget-title">{{ T "article.tableOfContents" }}</h2>
+            <nav class="toc-nav" id="TableOfContents" aria-labelledby="toc-widget-title">
                 {{ partial "article/components/toc" .Context | safeHTML }}
             </nav>
         </div>
