@@ -422,37 +422,7 @@ body {
     }
 }
 
-/* Keep Stack's built-in numbered TOC and scroll tracking. */
-.widget--toc {
-    background: var(--cl-bg-color);
-    box-shadow: var(--shadow-l1);
-}
-
-.toc-widget {
-    .widget--toc {
-        overflow: hidden;
-    }
-
-    .toc-widget-title {
-        margin: 0;
-        padding: 17px 20px;
-        border-bottom: 1px solid var(--cl-border-color);
-        background: var(--cl-quote-bg-color);
-        color: var(--cl-heading-color);
-        font-family: var(--cl-font-body);
-        font-size: 1.9rem;
-        font-weight: 600;
-        line-height: 1.5;
-        letter-spacing: 0.12em;
-        text-align: center;
-    }
-
-    .toc-nav {
-        font-size: 1.5rem;
-        line-height: 1.6;
-    }
-}
-
+/* Shared list styling also serves Stack's expandable mobile TOC. */
 .toc-nav {
     font-family: var(--cl-font-ui);
     font-size: 1.4rem;
@@ -493,14 +463,136 @@ body {
     }
 }
 
-#TableOfContents li.active-class > a {
-    margin-left: 0;
-    padding-left: 10px;
-    border-left: 0;
-    background: var(--cl-quote-bg-color);
-    color: var(--cl-accent-color);
-    box-shadow: inset 2px 0 0 var(--cl-accent-color);
-    font-weight: 600;
+/* Borderless rail navigation; Stack still owns anchors and scroll tracking. */
+.toc-widget {
+    --toc-indent: 18px;
+    --toc-active-color: #a7542c;
+
+    .widget--toc {
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    .toc-widget-title {
+        margin: 0 0 16px;
+        padding: 0 12px 0 23px;
+        border: 0;
+        background: transparent;
+        color: var(--cl-heading-color);
+        font-family: var(--cl-font-ui);
+        font-size: 1.8rem;
+        font-weight: 600;
+        line-height: 1.6;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: none;
+    }
+
+    .toc-nav {
+        font-size: 1.6rem;
+        line-height: 1.6;
+        padding-left: 2px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+
+        > ol {
+            margin: 0;
+            padding: 0 12px 0 20px;
+            border-left: 1px solid var(--cl-border-color);
+        }
+
+        li {
+            margin: 0;
+            padding: 0;
+
+            > ol {
+                margin: 0;
+                padding-left: var(--toc-indent);
+            }
+
+            > a {
+                position: relative;
+                display: grid;
+                grid-template-columns: max-content minmax(0, 1fr);
+                align-items: baseline;
+                column-gap: 10px;
+                margin: 0;
+                padding: 8px 0;
+                border: 0;
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+                color: var(--cl-control-text-color);
+                font-weight: 400;
+                overflow-wrap: anywhere;
+                transition: color 0.15s ease;
+            }
+
+            > a:first-of-type::before {
+                content: counters(item, ".");
+                min-width: 2ch;
+                margin: 0;
+                font-size: 0.84em;
+                font-weight: inherit;
+                font-variant-numeric: tabular-nums;
+            }
+
+            > a:hover {
+                background: transparent;
+                color: var(--toc-active-color);
+            }
+
+            > a:focus-visible {
+                outline: 2px solid var(--cl-accent-color);
+                outline-offset: 2px;
+            }
+        }
+
+        > ol > li > a {
+            color: var(--cl-text-color);
+            font-weight: 500;
+        }
+
+        // Keep the active marker on the same rail at all six heading levels.
+        $toc-path: "> ol";
+        @for $depth from 0 through 5 {
+            #{$toc-path} > li {
+                --toc-depth: #{$depth};
+            }
+            $toc-path: $toc-path + " > li > ol";
+        }
+    }
+
+    #TableOfContents li.active-class > a {
+        display: grid;
+        margin: 0;
+        padding: 8px 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        color: var(--toc-active-color);
+        font-weight: 600;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 9px;
+            left: calc(-22px - var(--toc-depth, 0) * var(--toc-indent));
+            width: 3px;
+            height: 24px;
+            border-radius: 2px;
+            background: var(--cl-accent-color);
+            pointer-events: none;
+        }
+    }
+}
+
+:root[data-scheme="dark"] .toc-widget {
+    --toc-active-color: var(--cl-accent-color);
 }
 
 .article-toc details {
