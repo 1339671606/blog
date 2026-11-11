@@ -1,0 +1,57 @@
+/* Native scroll controls, matching the blog's warm reading palette. */
+@media (forced-colors: none) {
+    :root {
+        --cl-scrollbar-thumb: #9b8876;
+        --cl-scrollbar-hover: #816951;
+    }
+
+    :root[data-scheme="dark"] {
+        --cl-scrollbar-thumb: #796858;
+        --cl-scrollbar-hover: #a28c77;
+    }
+
+    :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper) {
+        scrollbar-width: thin;
+        scrollbar-color: var(--cl-scrollbar-thumb) transparent;
+    }
+
+    /* Non-auto standard properties override Chromium's scrollbar pseudo-elements.
+       Reset them only where custom tracks, rounded thumbs and hidden arrows work. */
+    @supports selector(::-webkit-scrollbar) {
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper) {
+            scrollbar-width: auto;
+            scrollbar-color: auto;
+        }
+
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-track,
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-thumb {
+            min-width: 36px;
+            min-height: 36px;
+            border: 2px solid transparent;
+            border-radius: 99px;
+            background-color: var(--cl-scrollbar-thumb);
+            background-clip: padding-box;
+        }
+
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-thumb:hover,
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-thumb:active {
+            background-color: var(--cl-scrollbar-hover);
+        }
+
+        :is(html, #main-menu, .toc-nav, .article-content pre, .article-content .table-wrapper)::-webkit-scrollbar-button {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+    }
+}

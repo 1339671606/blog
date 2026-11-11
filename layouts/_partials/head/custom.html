@@ -1,3 +1,7 @@
+{{/* Plain CSS keeps modern scrollbar feature queries compatible with Stack's Sass compiler. */}}
+{{- $scrollbars := resources.Get "css/scrollbars.css" | minify | resources.Fingerprint "sha256" -}}
+<link rel="stylesheet" href="{{ $scrollbars.RelPermalink }}">
+
 {{/* Keep old tag-index links useful while retaining individual tag result pages. */}}
 {{ if and (eq .Kind "taxonomy") (eq .Data.Plural "tags") }}
 <meta name="robots" content="noindex">
