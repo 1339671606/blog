@@ -9,8 +9,7 @@
 }
 .arrival-header { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .arrival-brand { color: var(--cl-heading-color); font-size: 1.45rem; font-weight: 600; }
-.arrival-header .scheme-toggle-label { display: none; }
-.arrival-header #dark-mode-toggle { margin: 0; width: 42px; height: 42px; border: 1px solid var(--cl-border-color); background: var(--cl-bg-color); }
+.arrival-header #dark-mode-toggle { margin: 0; }
 .arrival-stage { flex: 1; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(240px, 1fr); align-items: center; gap: 76px; padding: 64px 0 76px; }
 .arrival-intro { min-width: 0; }
 .arrival-identity { display: flex; align-items: center; gap: 17px; }
