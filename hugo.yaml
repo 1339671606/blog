@@ -23,6 +23,23 @@ params:
     - posts
   article:
     toc: true
+    mermaid:
+      lightTheme: base
+      darkTheme: base
+      transparentBackground: true
+      fontFamily: '"Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif'
+      fontSize: 16
+      sequence:
+        width: 156
+        height: 56
+        actorMargin: 140
+        noteMargin: 8
+        messageMargin: 40
+      flowchart:
+        nodeSpacing: 35
+        rankSpacing: 45
+        padding: 16
+        curve: linear
   widgets:
     homepage:
       - type: categories

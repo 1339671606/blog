@@ -1,0 +1,55 @@
+{{- if .Store.Get "hasMermaid" -}}
+{{- $cfg := site.Params.article.mermaid | default dict -}}
+
+<div class="mermaid-modal" id="mermaid-modal" role="dialog" aria-modal="true" aria-label="放大查看 Mermaid 图表">
+    <div class="mermaid-modal-header">
+        <div class="mermaid-modal-controls">
+            <button type="button" data-zoom="-1">缩小</button>
+            <button type="button" data-zoom="0">原始大小</button>
+            <button type="button" data-zoom="1">放大</button>
+            <button type="button" data-zoom="fit">适应窗口</button>
+        </div>
+        <button type="button" class="mermaid-modal-close" id="mermaid-modal-close">关闭（Esc）</button>
+    </div>
+    <div class="mermaid-modal-body" id="mermaid-modal-body">
+        <div class="mermaid-modal-content" id="mermaid-modal-content"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js"></script>
+{{- $opts := dict "minify" hugo.IsProduction "format" "esm" -}}
+{{- $script := resources.Get "ts/mermaid.ts" | js.Build $opts | resources.Fingerprint "sha256" -}}
+{{- $jsConfig := dict
+    "transparentBackground" ($cfg.transparentBackground | default false)
+    "lightTheme"            ($cfg.lightTheme | default "default")
+    "darkTheme"             ($cfg.darkTheme | default "dark")
+    "lightThemeVariables"   ($cfg.lightThemeVariables | default dict)
+    "darkThemeVariables"    ($cfg.darkThemeVariables | default dict)
+    "securityLevel"         ($cfg.securityLevel | default "strict")
+    "look"                  ($cfg.look | default "classic")
+    "htmlLabels"            (not (eq ($cfg.htmlLabels | default true) false))
+    "sequence" (dict
+        "width" ($cfg.sequence.width | default 156)
+        "height" ($cfg.sequence.height | default 56)
+        "actorMargin" ($cfg.sequence.actorMargin | default 140)
+        "noteMargin" ($cfg.sequence.noteMargin | default 8)
+        "messageMargin" ($cfg.sequence.messageMargin | default 40)
+    )
+    "flowchart" (dict
+        "nodeSpacing" ($cfg.flowchart.nodeSpacing | default 35)
+        "rankSpacing" ($cfg.flowchart.rankSpacing | default 45)
+        "padding" ($cfg.flowchart.padding | default 16)
+        "curve" ($cfg.flowchart.curve | default "linear")
+    )
+-}}
+{{- with $cfg.maxTextSize }}{{ $jsConfig = merge $jsConfig (dict "maxTextSize" .) }}{{ end -}}
+{{- with $cfg.maxEdges }}{{ $jsConfig = merge $jsConfig (dict "maxEdges" .) }}{{ end -}}
+{{- with $cfg.fontSize }}{{ $jsConfig = merge $jsConfig (dict "fontSize" .) }}{{ end -}}
+{{- with $cfg.fontFamily }}{{ $jsConfig = merge $jsConfig (dict "fontFamily" .) }}{{ end -}}
+{{- with $cfg.curve }}{{ $jsConfig = merge $jsConfig (dict "curve" .) }}{{ end -}}
+{{- with $cfg.logLevel }}{{ $jsConfig = merge $jsConfig (dict "logLevel" .) }}{{ end -}}
+<script type="module">
+import { initMermaidPage } from '{{ $script.RelPermalink }}';
+initMermaidPage({{ $jsConfig | jsonify | safeJS }});
+</script>
+{{- end -}}
