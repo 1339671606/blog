@@ -1,0 +1,24 @@
+{{/* A directory defines a learning series; taxonomy defines related notes. */}}
+{{- $page := . -}}
+{{- $series := where .CurrentSection.RegularPages "Type" "in" .Site.Params.mainSections -}}
+{{- $series = $series.ByWeight -}}
+{{- $position := -1 -}}
+{{- range $index, $entry := $series -}}
+    {{- if eq $entry.RelPermalink $page.RelPermalink -}}{{- $position = $index -}}{{- end -}}
+{{- end -}}
+{{- if and (ge $position 0) (gt (len $series) 1) -}}
+<nav class="article-series" aria-label="本系列阅读导航">
+    <div class="article-series-heading">
+        <a href="{{ .CurrentSection.RelPermalink }}">{{ .CurrentSection.Title }} · 学习笔记</a>
+        <span>第 {{ add $position 1 }} / {{ len $series }} 篇</span>
+    </div>
+    <div class="article-series-links">
+        {{ if gt $position 0 }}{{ with index $series (sub $position 1) }}
+        <a class="series-previous" rel="prev" href="{{ .RelPermalink }}"><span>← 上一篇</span><strong>{{ .Title }}</strong></a>
+        {{ end }}{{ end }}
+        {{ if lt $position (sub (len $series) 1) }}{{ with index $series (add $position 1) }}
+        <a class="series-next" rel="next" href="{{ .RelPermalink }}"><span>下一篇 →</span><strong>{{ .Title }}</strong></a>
+        {{ end }}{{ end }}
+    </div>
+</nav>
+{{- end -}}

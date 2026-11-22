@@ -1,0 +1,34 @@
+{{ define "body-class" }}template-resources{{ end }}
+{{ define "main" }}
+<div class="resources-page">
+    <header class="resources-intro">
+        <p class="collection-overline">FIELD NOTES / LINKS</p>
+        <h1>{{ .Title }}</h1>
+        <div class="resources-description">{{ .Content }}</div>
+    </header>
+    <section class="resources-collection" aria-labelledby="resources-collection-title">
+        <div class="resources-collection-heading">
+            <h2 id="resources-collection-title">{{ .Params.collectionTitle | default "常用资源" }}</h2>
+            <span>{{ len .Params.links }} 个资源</span>
+        </div>
+        <div class="resources-grid">
+            {{ range $index, $link := .Params.links }}
+            <a class="resource-card" href="{{ .website }}" target="_blank" rel="noopener noreferrer" aria-label="{{ .title }}（在新标签页打开）">
+                <div class="resource-card-top">
+                    <span class="resource-card-icon" aria-hidden="true">{{ partial "helper/icon" (.icon | default "link") }}</span>
+                    <span class="resource-card-number" aria-hidden="true">{{ printf "%02d" (add $index 1) }}</span>
+                </div>
+                <h3>{{ .title }}</h3>
+                <p>{{ .description }}</p>
+                <div class="resource-card-footer">
+                    <span>{{ (urls.Parse .website).Host }}</span>
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
+                </div>
+            </a>
+            {{ end }}
+        </div>
+        <p class="resources-footnote">点击卡片，在新标签页打开。</p>
+    </section>
+</div>
+{{ partial "footer/footer" . }}
+{{ end }}

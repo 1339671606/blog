@@ -1,4 +1,6 @@
+interface SearchSection { title: string; anchor: string; content: string; }
 interface SearchEntry {
+    sections?: SearchSection[];
     title: string; permalink: string; content: string; prose: string;
     date: string; dateLabel: string; draft: boolean; categories: string[]; tags: string[];
 }
@@ -31,11 +33,25 @@ function excerptFor(entry: SearchEntry, pattern: RegExp): string {
     const end = Math.min(text.length, start + 190);
     return (start ? "… " : "") + text.slice(start, end) + (end < text.length ? " …" : "");
 }
-function renderSearchEntry(entry: SearchEntry, pattern: RegExp): HTMLElement {
+function bestSection(entry: SearchEntry, query: string): SearchSection | undefined {
+    const terms = query.trim().split(/\s+/).filter(Boolean).map(patternFor);
+    return (entry.sections || []).map(section => ({ section, score:
+        terms.filter(pattern => countMatches(section.content, pattern) > 0).length * 100
+        + terms.filter(pattern => countMatches(section.title, pattern) > 0).length * 15
+        + Math.min(countMatches(section.content, patternFor(query)), 20)
+    })).filter(result => result.score > 0).sort((a, b) => b.score - a.score)[0]?.section;
+}
+function renderSearchEntry(entry: SearchEntry, pattern: RegExp, query: string): HTMLElement {
     const article = document.createElement("article");
     article.className = "blog-search-card";
     const link = document.createElement("a");
-    link.href = entry.permalink;
+    const section = bestSection(entry, query);
+    const destination = new URL(entry.permalink, location.origin);
+    if (section) {
+        destination.searchParams.set("find", query.slice(0, 160));
+        if (section.anchor) destination.hash = section.anchor;
+    }
+    link.href = destination.href;
     const title = document.createElement("h2");
     appendHighlighted(title, entry.title, pattern);
     link.append(title);
@@ -59,8 +75,14 @@ function renderSearchEntry(entry: SearchEntry, pattern: RegExp): HTMLElement {
         meta.append(draft);
     }
     link.append(meta);
+    if (section) {
+        const location = document.createElement("div");
+        location.className = "blog-search-section";
+        location.textContent = "命中章节 · " + section.title + " ↗";
+        link.append(location);
+    }
     const excerpt = document.createElement("p");
-    appendHighlighted(excerpt, excerptFor(entry, pattern), pattern);
+    appendHighlighted(excerpt, excerptFor(section ? { ...entry, content: section.content, prose: section.content } : entry, pattern), pattern);
     link.append(excerpt);
     article.append(link);
     return article;
@@ -105,7 +127,7 @@ function setupSearch(root: HTMLElement) {
                     + countMatches((entry.categories || []).concat(entry.tags || []).join(" "), pattern) * 5
                     + countMatches(entry.content, pattern)
             })).filter(result => result.score > 0).sort((a, b) => b.score - a.score);
-            for (const result of matches) results.append(renderSearchEntry(result.entry, pattern));
+            for (const result of matches) results.append(renderSearchEntry(result.entry, pattern, query));
             status.textContent = matches.length ? "找到 " + matches.length + " 篇笔记" : "没有找到匹配结果";
             empty.hidden = matches.length > 0;
         } catch {

@@ -117,3 +117,12 @@
 @media (prefers-reduced-motion: reduce) {
     .mermaid-toolbar button { transition: none; }
 }
+
+/* Keep flowchart labels compact without shrinking sequence or state diagrams. */
+.mermaid-wrapper,
+.mermaid-offscreen,
+.mermaid-modal {
+    svg[aria-roledescription="flowchart-v2"] {
+        .nodeLabel p, .edgeLabel p { line-height: 1.4; text-wrap: balance; }
+    }
+}

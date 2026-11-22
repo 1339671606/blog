@@ -13,7 +13,7 @@ params:
     lastUpdated: "2006-01-02"
   sidebar:
     compact: false
-    subtitle: "前端 · Linux · 数据库 · Shell"
+    subtitle: "前端 · 运维 · 数据库"
     avatar: "img/github-avatar.png"
 
   colorScheme:
@@ -36,9 +36,11 @@ params:
         noteMargin: 8
         messageMargin: 40
       flowchart:
-        nodeSpacing: 35
-        rankSpacing: 45
-        padding: 16
+        nodeSpacing: 24
+        rankSpacing: 32
+        padding: 14
+        wrappingWidth: 128
+        fontSize: 15
         curve: linear
   widgets:
     homepage:

@@ -4,6 +4,8 @@
 <div class="article-details">
     {{ if and (not $IsList) (in $Page.Site.Params.mainSections $Page.Type) }}
     <div class="article-reader-toolbar">
+        {{ with $Page.GetTerms "categories" }}<button type="button" class="reading-context-trigger" data-reading-open="notes" aria-haspopup="dialog" aria-controls="related-notes-dialog">同类笔记</button>{{ end }}
+        {{ if $Page.Scratch.Get "TOCEnabled" }}<button type="button" class="reading-context-trigger reading-mobile-toc" data-reading-toc aria-haspopup="dialog" aria-controls="reading-toc-dialog">文章目录</button>{{ end }}
         <button type="button" class="reader-mode-toggle" data-reader-toggle data-reader-key="{{ printf "proli:%s:reader-mode:v1" $Page.Site.Home.RelPermalink }}" aria-controls="site-navigation" aria-pressed="false" title="收起左侧导航，扩大正文">
             <span aria-hidden="true">{{ partial "helper/icon" "reader" }}</span><span data-reader-label>沉浸阅读</span>
         </button>

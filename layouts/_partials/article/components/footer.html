@@ -7,4 +7,5 @@
         <span>{{ default .Site.Params.article.license.default .Params.license | markdownify }}</span>
     </section>
     {{ end }}
+    {{ if and .IsPage (in .Site.Params.mainSections .Type) }}{{ partial "article/components/reading-navigation" . }}{{ end }}
 </footer>

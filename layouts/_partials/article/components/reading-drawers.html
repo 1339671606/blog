@@ -1,0 +1,38 @@
+{{- $page := . -}}
+{{- $categories := .GetTerms "categories" -}}
+{{- with $categories -}}
+<dialog id="related-notes-dialog" class="reading-drawer" aria-labelledby="related-notes-title">
+    <header class="reading-drawer-header">
+        <div><p class="reading-drawer-eyebrow">KEEP EXPLORING</p><h2 id="related-notes-title">同类笔记</h2><p>当前文章已标出，选择另一篇继续阅读。</p></div>
+        <button class="reading-drawer-close" type="button" data-reading-close aria-label="关闭同类笔记">×</button>
+    </header>
+    <div class="reading-drawer-filters" aria-label="选择分类">
+        {{ range $index, $term := . }}
+        <button type="button" data-category-filter="notes-category-{{ $index }}" aria-controls="notes-category-{{ $index }}" aria-pressed="{{ if eq $index 0 }}true{{ else }}false{{ end }}">{{ .LinkTitle }}<span>{{ len (where (where .RegularPages "Type" "in" $page.Site.Params.mainSections) "Kind" "page") }}</span></button>
+        {{ end }}
+    </div>
+    <div class="reading-drawer-scroll">
+        {{ range $index, $term := . }}
+        <section id="notes-category-{{ $index }}" data-category-panel{{ if ne $index 0 }} hidden{{ end }} aria-label="{{ .LinkTitle }}分类的笔记">
+            <ol class="related-notes-list">
+                {{ range (where (where .RegularPages "Type" "in" $page.Site.Params.mainSections) "Kind" "page").ByWeight }}
+                <li><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $page.RelPermalink }} aria-current="page"{{ end }}><span>{{ .Title }}</span>{{ if eq .RelPermalink $page.RelPermalink }}<small>正在阅读</small>{{ else if .Draft }}<small>草稿</small>{{ end }}</a></li>
+                {{ end }}
+            </ol>
+            <a class="reading-category-link" href="{{ .RelPermalink }}">浏览此分类全部笔记 →</a>
+        </section>
+        {{ end }}
+    </div>
+</dialog>
+{{- end -}}
+{{- if .Scratch.Get "TOCEnabled" -}}
+<dialog id="reading-toc-dialog" class="reading-drawer" aria-labelledby="reading-toc-title">
+    <header class="reading-drawer-header">
+        <div><p class="reading-drawer-eyebrow">ON THIS PAGE</p><h2 id="reading-toc-title">文章目录</h2><p>{{ .Title }}</p></div>
+        <button class="reading-drawer-close" type="button" data-reading-close aria-label="关闭文章目录">×</button>
+    </header>
+    <nav class="reading-drawer-scroll reading-drawer-toc" aria-label="文章章节">
+        {{ partial "article/components/toc" . | safeHTML }}
+    </nav>
+</dialog>
+{{- end -}}

@@ -1,3 +1,6 @@
+import { setupReadingNavigation } from "./reading-navigation";
+import { setupSearchTarget } from "./search-target";
+
 /* Project reading controls. Stack retains its TOC, code-copy and image behavior. */
 function setupReadingTools() {
     const tools = document.querySelector<HTMLElement>(".reading-tools");
@@ -17,19 +20,6 @@ function setupReadingTools() {
         window.scrollTo({ top: 0, behavior: behavior() });
         const title = document.querySelector<HTMLElement>(".article-header .article-title");
         if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
-    });
-    tools.querySelector<HTMLButtonElement>("[data-reading-toc]")?.addEventListener("click", () => {
-        const inline = document.querySelector<HTMLElement>(".article-toc");
-        if (inline && inline.getClientRects().length) {
-            const details = inline.querySelector<HTMLDetailsElement>("details");
-            if (details) details.open = true;
-            inline.scrollIntoView({ block: "start", behavior: behavior() });
-            inline.querySelector<HTMLElement>("summary")?.focus({ preventScroll: true });
-        } else {
-            const sidebar = document.querySelector<HTMLElement>("#TableOfContents");
-            sidebar?.scrollTo({ top: 0, behavior: behavior() });
-            sidebar?.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
-        }
     });
     update();
 }
@@ -59,7 +49,7 @@ function setupReaderMode() {
     };
     toggle.addEventListener("click", () => setMode(!focused()));
     document.addEventListener("keydown", event => {
-        if (event.key !== "Escape" || !focused() || document.querySelector(".pswp--open")) return;
+        if (event.key !== "Escape" || !focused() || document.querySelector(".pswp--open, .reading-drawer[open]")) return;
         const target = event.target as HTMLElement | null;
         if (target?.closest("input, textarea, select, [contenteditable=true]")) return;
         setMode(false);
@@ -92,7 +82,7 @@ function setupSchemeButton() {
     sync();
 }
 
-function setupProjectUI() { setupReadingTools(); setupReaderMode(); setupSchemeButton(); }
+function setupProjectUI() { setupReadingNavigation(); setupReadingTools(); setupReaderMode(); setupSchemeButton(); setupSearchTarget(); }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setupProjectUI);
 else setupProjectUI();
 export {};

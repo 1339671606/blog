@@ -1,4 +1,5 @@
 declare const mermaid: {
+    detectType(source: string): string;
     initialize(config: Record<string, any>): void;
     run(options: { nodes: HTMLElement[] }): Promise<void>;
 };
@@ -67,7 +68,7 @@ function buildBaseConfig(cfg: MermaidConfig): Record<string, any> {
         look: cfg.look ?? 'classic',
         flowchart: {
             htmlLabels: cfg.htmlLabels ?? true, useMaxWidth: true,
-            nodeSpacing: 35, rankSpacing: 45, padding: 16, curve: cfg.curve ?? 'linear',
+            nodeSpacing: 24, rankSpacing: 32, padding: 14, wrappingWidth: 128, fontSize: 15, curve: cfg.curve ?? 'linear',
             ...cfg.flowchart,
         },
         sequence: {
@@ -92,12 +93,20 @@ function initWithTheme(
     scheme: Scheme,
     themes: Record<Scheme, ReturnType<typeof buildThemeConfig>>,
     baseConfig: Record<string, any>,
+    flowchart = false,
 ) {
     const { theme, themeVariables } = themes[scheme];
     mermaid.initialize({
         ...baseConfig,
         theme,
-        ...(Object.keys(themeVariables).length && { themeVariables }),
+        themeVariables: {
+            ...themeVariables,
+            ...(flowchart && { fontSize: `${baseConfig.flowchart.fontSize}px` }),
+        },
+        ...(flowchart && {
+            fontSize: baseConfig.flowchart.fontSize,
+            themeCSS: '.nodeLabel p, .edgeLabel p { margin: 0; line-height: 1.4; text-wrap: balance; }',
+        }),
     });
 }
 
@@ -156,10 +165,62 @@ function alignSequenceBoxes(svg: SVGSVGElement) {
     });
 }
 
-function prepareDiagram(el: HTMLElement) {
+// Compress vertical flowchart geometry as a whole so arrows stay attached.
+// Counter-scale labels around their centers to keep the text readable and undistorted.
+function compactVerticalFlowchart(svg: SVGSVGElement, source: string) {
+    const direction = source.match(/^\s*(?:flowchart|graph)\s+(TD|TB|BT|LR|RL)\b/m)?.[1];
+    if (!svg.classList.contains('flowchart') || !direction || !['TD', 'TB', 'BT'].includes(direction)) return;
+    // Cluster headings have independent padding; keep those layouts native.
+    if (svg.querySelector('.cluster')) return;
+    const viewBox = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
+    if (!viewBox || viewBox.length !== 4 || !viewBox.every(Number.isFinite)) return;
+    let scale = 0.68;
+    for (const node of svg.querySelectorAll<SVGGElement>('g.node')) {
+        const label = node.querySelector<SVGGraphicsElement>('.label');
+        const shape = node.querySelector<SVGGraphicsElement>(':scope > rect, :scope > polygon, :scope > circle, :scope > ellipse, :scope > path');
+        if (!label || !shape) continue;
+        const text = label.getBBox();
+        const box = shape.getBBox();
+        if (!box.height) continue;
+        // Preserve at least 12 px of vertical breathing room in process boxes.
+        let minimum = (text.height + 12) / box.height;
+        const points = shape.getAttribute('points')?.trim().split(/\s+/).map(point => point.split(',').map(Number));
+        const diamond = shape.matches('polygon') && points?.length === 4
+            && points[0][0] === points[2][0] && points[1][1] === points[3][1];
+        if (diamond) {
+            // The text rectangle must remain inside the diamond's sloping edges.
+            minimum = (text.height + 8) / Math.max(1, box.height * (1 - text.width / box.width));
+        }
+        scale = Math.max(scale, minimum);
+    }
+    if (scale >= 0.94) return;
+    svg.querySelectorAll<SVGGraphicsElement>('foreignObject, text').forEach(label => {
+        const box = label.getBBox();
+        if (!box.height) return;
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const center = box.y + box.height / 2;
+        group.setAttribute('transform', `translate(0 ${center}) scale(1 ${1 / scale}) translate(0 ${-center})`);
+        label.parentNode!.insertBefore(group, label);
+        group.appendChild(label);
+    });
+    const geometry = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    geometry.setAttribute('transform', `translate(0 ${viewBox[1] * (1 - scale)}) scale(1 ${scale})`);
+    geometry.dataset.compactFlowchart = 'true';
+    for (const child of Array.from(svg.children)) {
+        if (!['style', 'defs', 'title', 'desc'].includes(child.localName)) geometry.appendChild(child);
+    }
+    svg.appendChild(geometry);
+    svg.querySelectorAll('path, rect, polygon, circle, ellipse, line, polyline').forEach(shape => {
+        shape.setAttribute('vector-effect', 'non-scaling-stroke');
+    });
+    svg.setAttribute('viewBox', `${viewBox[0]} ${viewBox[1]} ${viewBox[2]} ${viewBox[3] * scale}`);
+}
+
+function prepareDiagram(el: HTMLElement, source: string) {
     const svg = el.querySelector<SVGSVGElement>('svg');
     if (!svg) return;
     alignSequenceBoxes(svg);
+    compactVerticalFlowchart(svg, source);
     const width = Number(svg.getAttribute('viewBox')?.split(/[\s,]+/)[2]);
     if (width > 0) {
         svg.style.width = `${width}px`;
@@ -169,7 +230,7 @@ function prepareDiagram(el: HTMLElement) {
     }
 }
 
-async function renderOffscreen(sources: string[]): Promise<string[]> {
+async function renderOffscreen(sources: string[], configure: (source: string) => void): Promise<string[]> {
     const container = document.createElement('div');
     container.className = 'mermaid-offscreen';
     document.body.appendChild(container);
@@ -181,9 +242,12 @@ async function renderOffscreen(sources: string[]): Promise<string[]> {
         return n;
     });
     try {
-        await mermaid.run({ nodes });
-        if (document.fonts) await document.fonts.ready;
-        nodes.forEach(prepareDiagram);
+        for (let i = 0; i < nodes.length; i++) {
+            configure(sources[i]);
+            await mermaid.run({ nodes: [nodes[i]] });
+            if (document.fonts) await document.fonts.ready;
+            prepareDiagram(nodes[i], sources[i]);
+        }
         return nodes.map(n => n.innerHTML);
     } finally {
         container.remove();
@@ -334,8 +398,12 @@ export async function initMermaidPage(config: MermaidConfig) {
         if (cache[scheme].length) return Promise.resolve(cache[scheme]);
         if (pending[scheme]) return pending[scheme]!;
         const task = queue.then(async () => {
-            initWithTheme(scheme, themes, baseConfig);
-            const diagrams = await renderOffscreen(sources);
+            const diagrams = await renderOffscreen(sources, source => {
+                initWithTheme(scheme, themes, baseConfig);
+                if (mermaid.detectType(source).startsWith('flowchart')) {
+                    initWithTheme(scheme, themes, baseConfig, true);
+                }
+            });
             cache[scheme] = diagrams;
             return diagrams;
         });
