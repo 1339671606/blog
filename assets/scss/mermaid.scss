@@ -1,4 +1,52 @@
-/* Diagram styling is separate from article code blocks. */
+/* Diagram styling is separate from article code blocks.
+ * Synced with Typora's proli-mermaid warm palette (light + dark):
+ * only style colors, strokes, radii, and shadows; leave Mermaid's native
+ * font sizing and line heights untouched so label measurement stays accurate.
+ */
+:root,
+:root[data-scheme="light"] {
+    --proli-mm-font: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    --proli-mm-paper: var(--cl-bg-color, #faf9f5);
+    --proli-mm-ink: #2b2621;
+    --proli-mm-muted: #72695e;
+
+    --proli-mm-fill: #fffdf9;
+    --proli-mm-border: #d9cdbf;
+    --proli-mm-shadow: rgba(84, 62, 40, 0.10);
+
+    --proli-mm-accent: #bc6a3a;
+    --proli-mm-accent-fill: #f8ebe1;
+    --proli-mm-accent-border: #e3bfa4;
+
+    --proli-mm-line: #a39382;
+
+    --proli-mm-cluster-fill: rgba(243, 237, 229, 0.45);
+    --proli-mm-cluster-border: #dccfbf;
+    --proli-mm-note-fill: #fbf4e7;
+    --proli-mm-note-border: #e8d6b9;
+}
+
+:root[data-scheme="dark"] {
+    --proli-mm-paper: var(--cl-bg-color, #151210);
+    --proli-mm-ink: #e8dfd5;
+    --proli-mm-muted: #a7998b;
+
+    --proli-mm-fill: #221d19;
+    --proli-mm-border: #4a3e35;
+    --proli-mm-shadow: rgba(0, 0, 0, 0.35);
+
+    --proli-mm-accent: #d59567;
+    --proli-mm-accent-fill: #33241b;
+    --proli-mm-accent-border: #7a523a;
+
+    --proli-mm-line: #8c7b6c;
+
+    --proli-mm-cluster-fill: rgba(42, 35, 30, 0.45);
+    --proli-mm-cluster-border: #45392f;
+    --proli-mm-note-fill: #2a2219;
+    --proli-mm-note-border: #5e4a35;
+}
+
 :root,
 :root[data-scheme="light"],
 :root[data-scheme="dark"] {
@@ -26,10 +74,9 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    color: var(--cl-text-color);
-    font-family: var(--cl-font-ui);
+    color: var(--proli-mm-ink);
+    font-family: var(--proli-mm-font);
     font-size: 16px;
-    line-height: 1.5;
     white-space: normal;
     overflow-x: auto;
     overflow-y: hidden;
@@ -48,13 +95,257 @@
 .mermaid-offscreen,
 .mermaid-modal {
     svg {
-        rect.actor { rx: 8px; ry: 8px; stroke-width: 1px; }
-        .actor-line { stroke-width: 1px; stroke-dasharray: 4 5; }
-        .messageLine0, .messageLine1 { stroke-width: 1.25px; }
-        rect.note { rx: 5px; ry: 5px; stroke-width: 1px; }
-        .loopLine, .labelBox { stroke-width: 1px; }
-        .node rect { rx: 6px; ry: 6px; }
-        .nodeLabel p, .edgeLabel p { margin: 0 !important; font-family: var(--cl-font-ui); line-height: 1.5; }
+        background: transparent !important;
+        color: var(--proli-mm-ink);
+        font-family: var(--proli-mm-font) !important;
+
+        text,
+        tspan,
+        .nodeLabel,
+        .edgeLabel,
+        .label {
+            font-family: var(--proli-mm-font) !important;
+        }
+
+        /* Keep Mermaid 11 wrapping reliable under non-integer zoom and CJK text. */
+        foreignObject > div {
+            white-space: break-spaces !important;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        .node foreignObject > div {
+            max-width: 240px !important;
+        }
+
+        /* Flowchart nodes */
+        .node {
+            filter: drop-shadow(0 1px 1.5px var(--proli-mm-shadow));
+        }
+
+        &.flowchart .node {
+            rect,
+            circle,
+            ellipse,
+            polygon,
+            path {
+                fill: var(--proli-mm-fill) !important;
+                stroke: var(--proli-mm-border) !important;
+                stroke-width: 1px !important;
+            }
+
+            rect {
+                rx: 8px;
+                ry: 8px;
+            }
+
+            polygon {
+                fill: var(--proli-mm-accent-fill) !important;
+                stroke: var(--proli-mm-accent-border) !important;
+            }
+        }
+
+        .statediagram-state rect.basic {
+            rx: 8px;
+            ry: 8px;
+        }
+
+        /* Text */
+        .nodeLabel,
+        .nodeLabel p,
+        .label {
+            color: var(--proli-mm-ink) !important;
+        }
+
+        .nodeLabel p,
+        .edgeLabel p {
+            margin: 0 !important;
+        }
+
+        .node text,
+        .node tspan,
+        .statediagram-state text,
+        .statediagram-state tspan {
+            fill: var(--proli-mm-ink) !important;
+            stroke: none !important;
+        }
+
+        /* Custom inline style / classDef fills are usually light; keep text legible in dark mode. */
+        .node#{":has(> [style*='fill'])"} {
+            .nodeLabel,
+            .nodeLabel p {
+                color: #2b2621 !important;
+            }
+        }
+
+        /* Connectors and arrows */
+        .edgePath .path,
+        .flowchart-link,
+        .transition {
+            stroke: var(--proli-mm-line) !important;
+            stroke-width: 1.3px !important;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        marker path,
+        marker polygon,
+        .arrowheadPath {
+            fill: var(--proli-mm-line) !important;
+            stroke: var(--proli-mm-line) !important;
+        }
+
+        .edgeLabel,
+        .edgeLabel div,
+        .edgeLabel span,
+        .edgeLabel p,
+        .labelBkg {
+            background: var(--proli-mm-paper) !important;
+            background-color: var(--proli-mm-paper) !important;
+        }
+
+        .edgeLabel rect {
+            fill: var(--proli-mm-paper) !important;
+        }
+
+        .edgeLabel,
+        .edgeLabel p,
+        .edgeLabel span {
+            color: var(--proli-mm-muted) !important;
+        }
+
+        .edgeLabel text,
+        .edgeLabel tspan {
+            fill: var(--proli-mm-muted) !important;
+            stroke: none !important;
+        }
+
+        /* Subgraph / cluster */
+        .cluster rect {
+            fill: var(--proli-mm-cluster-fill) !important;
+            stroke: var(--proli-mm-cluster-border) !important;
+            stroke-width: 1px !important;
+            stroke-dasharray: 5 4;
+            rx: 10px;
+            ry: 10px;
+        }
+
+        .cluster-label,
+        .cluster-label .nodeLabel,
+        .cluster-label p,
+        .cluster text {
+            color: var(--proli-mm-muted) !important;
+            fill: var(--proli-mm-muted) !important;
+            font-weight: 600;
+        }
+
+        /* Sequence diagrams */
+        rect.actor {
+            fill: var(--proli-mm-fill) !important;
+            stroke: var(--proli-mm-border) !important;
+            stroke-width: 1px !important;
+            rx: 8px;
+            ry: 8px;
+            filter: drop-shadow(0 1px 1.5px var(--proli-mm-shadow));
+        }
+
+        .activation0,
+        .activation1,
+        .activation2 {
+            fill: var(--proli-mm-accent-fill) !important;
+            stroke: var(--proli-mm-accent-border) !important;
+        }
+
+        rect.note {
+            fill: var(--proli-mm-note-fill) !important;
+            stroke: var(--proli-mm-note-border) !important;
+            stroke-width: 1px !important;
+            rx: 6px;
+            ry: 6px;
+        }
+
+        text.actor,
+        text.actor tspan,
+        .messageText,
+        .messageText tspan,
+        .noteText,
+        .noteText tspan {
+            fill: var(--proli-mm-ink) !important;
+            stroke: none !important;
+        }
+
+        .actor-line {
+            stroke: var(--proli-mm-border) !important;
+            stroke-width: 1px !important;
+            stroke-dasharray: 3 4 !important;
+        }
+
+        .messageLine0,
+        .messageLine1 {
+            stroke: var(--proli-mm-line) !important;
+            stroke-width: 1.3px !important;
+        }
+
+        .loopLine {
+            stroke: var(--proli-mm-cluster-border) !important;
+            stroke-width: 1px !important;
+            stroke-dasharray: 5 4 !important;
+            fill: var(--proli-mm-cluster-fill) !important;
+        }
+
+        .labelBox {
+            fill: var(--proli-mm-accent-fill) !important;
+            stroke: var(--proli-mm-accent-border) !important;
+            stroke-width: 1px !important;
+        }
+
+        .labelText,
+        .labelText tspan {
+            fill: var(--proli-mm-accent) !important;
+            stroke: none !important;
+            font-weight: 600;
+        }
+
+        .loopText,
+        .loopText tspan {
+            fill: var(--proli-mm-muted) !important;
+            stroke: none !important;
+        }
+
+        /* State diagrams */
+        .statediagram-state rect.basic,
+        .statediagram-state rect.divider,
+        .stateGroup rect {
+            fill: var(--proli-mm-fill) !important;
+            stroke: var(--proli-mm-border) !important;
+            stroke-width: 1px !important;
+        }
+
+        .state-start,
+        .start-state,
+        circle.state-start {
+            fill: var(--proli-mm-accent) !important;
+            stroke: var(--proli-mm-accent) !important;
+        }
+
+        .node[id*="_end-"] > g > path:nth-of-type(1) {
+            fill: var(--proli-mm-paper) !important;
+        }
+
+        .node[id*="_end-"] > g > path:nth-of-type(2) {
+            stroke: var(--proli-mm-accent) !important;
+            stroke-width: 1.5px !important;
+        }
+
+        .node[id*="_end-"] > g > g > path {
+            fill: var(--proli-mm-accent) !important;
+            stroke: var(--proli-mm-accent) !important;
+        }
+
+        .statediagram .edgeLabel,
+        .statediagram-note rect {
+            color: var(--proli-mm-muted) !important;
+        }
     }
 }
 
@@ -116,13 +407,4 @@
 
 @media (prefers-reduced-motion: reduce) {
     .mermaid-toolbar button { transition: none; }
-}
-
-/* Keep flowchart labels compact without shrinking sequence or state diagrams. */
-.mermaid-wrapper,
-.mermaid-offscreen,
-.mermaid-modal {
-    svg[aria-roledescription="flowchart-v2"] {
-        .nodeLabel p, .edgeLabel p { line-height: 1.4; text-wrap: balance; }
-    }
 }

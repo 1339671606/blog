@@ -1,5 +1,4 @@
 declare const mermaid: {
-    detectType(source: string): string;
     initialize(config: Record<string, any>): void;
     run(options: { nodes: HTMLElement[] }): Promise<void>;
 };
@@ -26,6 +25,12 @@ interface MermaidConfig {
 type Scheme = 'light' | 'dark';
 
 const PANZOOM_CDN = 'https://cdn.jsdelivr.net/npm/panzoom@9.4.3/+esm';
+const DEFAULT_FONT_FAMILY = '"PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif';
+const MEASUREMENT_CSS = [
+    'foreignObject > div { white-space: break-spaces !important; word-break: keep-all; overflow-wrap: anywhere; }',
+    '.node foreignObject > div { max-width: 240px !important; }',
+    '.nodeLabel p, .edgeLabel p { margin: 0 !important; }',
+].join('\n');
 
 function getScheme(): Scheme {
     return document.documentElement.dataset.scheme === 'dark' ? 'dark' : 'light';
@@ -36,39 +41,51 @@ function buildThemeConfig(cfg: MermaidConfig, scheme: Scheme) {
     const theme = isLight ? (cfg.lightTheme ?? 'base') : (cfg.darkTheme ?? 'base');
     const vars = isLight ? (cfg.lightThemeVariables ?? {}) : (cfg.darkThemeVariables ?? {});
     const paper = isLight ? '#faf9f5' : '#151210';
-    const ink = isLight ? '#2b2621' : '#ddd4ca';
-    const fill = isLight ? '#f3ede5' : '#241e19';
-    const border = isLight ? '#d8cbbb' : '#685343';
-    const line = isLight ? '#8e7b68' : '#b3a08e';
+    const ink = isLight ? '#2b2621' : '#e8dfd5';
+    const muted = isLight ? '#72695e' : '#a7998b';
+    const fill = isLight ? '#fffdf9' : '#221d19';
+    const border = isLight ? '#d9cdbf' : '#4a3e35';
+    const accent = isLight ? '#bc6a3a' : '#d59567';
+    const accentFill = isLight ? '#f8ebe1' : '#33241b';
+    const accentBorder = isLight ? '#e3bfa4' : '#7a523a';
+    const line = isLight ? '#a39382' : '#8c7b6c';
+    const clusterFill = isLight ? 'rgba(243, 237, 229, 0.45)' : 'rgba(42, 35, 30, 0.45)';
+    const clusterBorder = isLight ? '#dccfbf' : '#45392f';
+    const noteFill = isLight ? '#fbf4e7' : '#2a2219';
+    const noteBorder = isLight ? '#e8d6b9' : '#5e4a35';
+    const fontFamily = cfg.fontFamily ?? DEFAULT_FONT_FAMILY;
     return {
         theme,
         themeVariables: {
             darkMode: !isLight, background: paper,
-            fontFamily: cfg.fontFamily, fontSize: `${cfg.fontSize ?? 16}px`,
+            fontFamily, fontSize: `${cfg.fontSize ?? 16}px`,
             primaryColor: fill, primaryTextColor: ink, primaryBorderColor: border,
-            secondaryColor: fill, secondaryTextColor: ink, secondaryBorderColor: border,
-            tertiaryColor: paper, tertiaryTextColor: ink, tertiaryBorderColor: border,
+            secondaryColor: accentFill, secondaryTextColor: ink, secondaryBorderColor: accentBorder,
+            tertiaryColor: clusterFill, tertiaryTextColor: muted, tertiaryBorderColor: clusterBorder,
             textColor: ink, lineColor: line, mainBkg: fill,
-            nodeBorder: border, nodeTextColor: ink, clusterBkg: paper, clusterBorder: border,
+            nodeBorder: border, nodeTextColor: ink, clusterBkg: clusterFill, clusterBorder,
             edgeLabelBackground: paper,
-            actorBkg: fill, actorBorder: border, actorTextColor: ink, actorLineColor: line,
+            actorBkg: fill, actorBorder: border, actorTextColor: ink, actorLineColor: border,
             signalColor: line, signalTextColor: ink,
-            noteBkgColor: fill, noteBorderColor: border, noteTextColor: ink,
-            labelBoxBkgColor: fill, labelBoxBorderColor: border, labelTextColor: ink,
-            loopTextColor: ink, activationBkgColor: fill, activationBorderColor: border,
+            noteBkgColor: noteFill, noteBorderColor: noteBorder, noteTextColor: ink,
+            labelBoxBkgColor: accentFill, labelBoxBorderColor: accentBorder, labelTextColor: accent,
+            loopTextColor: muted, activationBkgColor: accentFill, activationBorderColor: accentBorder,
             ...vars,
         },
     };
 }
 
 function buildBaseConfig(cfg: MermaidConfig): Record<string, any> {
+    const fontFamily = cfg.fontFamily ?? DEFAULT_FONT_FAMILY;
     const base: Record<string, any> = {
         startOnLoad: false,
         securityLevel: cfg.securityLevel ?? 'strict',
         look: cfg.look ?? 'classic',
+        fontFamily,
+        themeCSS: MEASUREMENT_CSS,
         flowchart: {
             htmlLabels: cfg.htmlLabels ?? true, useMaxWidth: true,
-            nodeSpacing: 24, rankSpacing: 32, padding: 14, wrappingWidth: 128, fontSize: 15, curve: cfg.curve ?? 'linear',
+            wrappingWidth: 240, curve: cfg.curve ?? 'basis',
             ...cfg.flowchart,
         },
         sequence: {
@@ -76,7 +93,7 @@ function buildBaseConfig(cfg: MermaidConfig): Record<string, any> {
             diagramMarginX: 18, diagramMarginY: 14,
             width: 156, height: 56, actorMargin: 140, boxMargin: 12,
             noteMargin: 8, messageMargin: 40, mirrorActors: false,
-            actorFontFamily: cfg.fontFamily, messageFontFamily: cfg.fontFamily, noteFontFamily: cfg.fontFamily,
+            actorFontFamily: fontFamily, messageFontFamily: fontFamily, noteFontFamily: fontFamily,
             actorFontSize: cfg.fontSize ?? 16, messageFontSize: cfg.fontSize ?? 16, noteFontSize: cfg.fontSize ?? 16,
             ...cfg.sequence,
         },
@@ -93,20 +110,12 @@ function initWithTheme(
     scheme: Scheme,
     themes: Record<Scheme, ReturnType<typeof buildThemeConfig>>,
     baseConfig: Record<string, any>,
-    flowchart = false,
 ) {
     const { theme, themeVariables } = themes[scheme];
     mermaid.initialize({
         ...baseConfig,
         theme,
-        themeVariables: {
-            ...themeVariables,
-            ...(flowchart && { fontSize: `${baseConfig.flowchart.fontSize}px` }),
-        },
-        ...(flowchart && {
-            fontSize: baseConfig.flowchart.fontSize,
-            themeCSS: '.nodeLabel p, .edgeLabel p { margin: 0; line-height: 1.4; text-wrap: balance; }',
-        }),
+        themeVariables,
     });
 }
 
@@ -165,62 +174,10 @@ function alignSequenceBoxes(svg: SVGSVGElement) {
     });
 }
 
-// Compress vertical flowchart geometry as a whole so arrows stay attached.
-// Counter-scale labels around their centers to keep the text readable and undistorted.
-function compactVerticalFlowchart(svg: SVGSVGElement, source: string) {
-    const direction = source.match(/^\s*(?:flowchart|graph)\s+(TD|TB|BT|LR|RL)\b/m)?.[1];
-    if (!svg.classList.contains('flowchart') || !direction || !['TD', 'TB', 'BT'].includes(direction)) return;
-    // Cluster headings have independent padding; keep those layouts native.
-    if (svg.querySelector('.cluster')) return;
-    const viewBox = svg.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
-    if (!viewBox || viewBox.length !== 4 || !viewBox.every(Number.isFinite)) return;
-    let scale = 0.68;
-    for (const node of svg.querySelectorAll<SVGGElement>('g.node')) {
-        const label = node.querySelector<SVGGraphicsElement>('.label');
-        const shape = node.querySelector<SVGGraphicsElement>(':scope > rect, :scope > polygon, :scope > circle, :scope > ellipse, :scope > path');
-        if (!label || !shape) continue;
-        const text = label.getBBox();
-        const box = shape.getBBox();
-        if (!box.height) continue;
-        // Preserve at least 12 px of vertical breathing room in process boxes.
-        let minimum = (text.height + 12) / box.height;
-        const points = shape.getAttribute('points')?.trim().split(/\s+/).map(point => point.split(',').map(Number));
-        const diamond = shape.matches('polygon') && points?.length === 4
-            && points[0][0] === points[2][0] && points[1][1] === points[3][1];
-        if (diamond) {
-            // The text rectangle must remain inside the diamond's sloping edges.
-            minimum = (text.height + 8) / Math.max(1, box.height * (1 - text.width / box.width));
-        }
-        scale = Math.max(scale, minimum);
-    }
-    if (scale >= 0.94) return;
-    svg.querySelectorAll<SVGGraphicsElement>('foreignObject, text').forEach(label => {
-        const box = label.getBBox();
-        if (!box.height) return;
-        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        const center = box.y + box.height / 2;
-        group.setAttribute('transform', `translate(0 ${center}) scale(1 ${1 / scale}) translate(0 ${-center})`);
-        label.parentNode!.insertBefore(group, label);
-        group.appendChild(label);
-    });
-    const geometry = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    geometry.setAttribute('transform', `translate(0 ${viewBox[1] * (1 - scale)}) scale(1 ${scale})`);
-    geometry.dataset.compactFlowchart = 'true';
-    for (const child of Array.from(svg.children)) {
-        if (!['style', 'defs', 'title', 'desc'].includes(child.localName)) geometry.appendChild(child);
-    }
-    svg.appendChild(geometry);
-    svg.querySelectorAll('path, rect, polygon, circle, ellipse, line, polyline').forEach(shape => {
-        shape.setAttribute('vector-effect', 'non-scaling-stroke');
-    });
-    svg.setAttribute('viewBox', `${viewBox[0]} ${viewBox[1]} ${viewBox[2]} ${viewBox[3] * scale}`);
-}
-
-function prepareDiagram(el: HTMLElement, source: string) {
+function prepareDiagram(el: HTMLElement) {
     const svg = el.querySelector<SVGSVGElement>('svg');
     if (!svg) return;
     alignSequenceBoxes(svg);
-    compactVerticalFlowchart(svg, source);
     const width = Number(svg.getAttribute('viewBox')?.split(/[\s,]+/)[2]);
     if (width > 0) {
         svg.style.width = `${width}px`;
@@ -230,7 +187,7 @@ function prepareDiagram(el: HTMLElement, source: string) {
     }
 }
 
-async function renderOffscreen(sources: string[], configure: (source: string) => void): Promise<string[]> {
+async function renderOffscreen(sources: string[]): Promise<string[]> {
     const container = document.createElement('div');
     container.className = 'mermaid-offscreen';
     document.body.appendChild(container);
@@ -242,12 +199,9 @@ async function renderOffscreen(sources: string[], configure: (source: string) =>
         return n;
     });
     try {
-        for (let i = 0; i < nodes.length; i++) {
-            configure(sources[i]);
-            await mermaid.run({ nodes: [nodes[i]] });
-            if (document.fonts) await document.fonts.ready;
-            prepareDiagram(nodes[i], sources[i]);
-        }
+        await mermaid.run({ nodes });
+        if (document.fonts) await document.fonts.ready;
+        nodes.forEach(prepareDiagram);
         return nodes.map(n => n.innerHTML);
     } finally {
         container.remove();
@@ -398,12 +352,8 @@ export async function initMermaidPage(config: MermaidConfig) {
         if (cache[scheme].length) return Promise.resolve(cache[scheme]);
         if (pending[scheme]) return pending[scheme]!;
         const task = queue.then(async () => {
-            const diagrams = await renderOffscreen(sources, source => {
-                initWithTheme(scheme, themes, baseConfig);
-                if (mermaid.detectType(source).startsWith('flowchart')) {
-                    initWithTheme(scheme, themes, baseConfig, true);
-                }
-            });
+            initWithTheme(scheme, themes, baseConfig);
+            const diagrams = await renderOffscreen(sources);
             cache[scheme] = diagrams;
             return diagrams;
         });

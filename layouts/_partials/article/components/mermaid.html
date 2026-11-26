@@ -19,6 +19,13 @@
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.min.js"></script>
 {{- $opts := dict "minify" hugo.IsProduction "format" "esm" -}}
 {{- $script := resources.Get "ts/mermaid.ts" | js.Build $opts | resources.Fingerprint "sha256" -}}
+{{- $flowchart := dict
+    "wrappingWidth" ($cfg.flowchart.wrappingWidth | default 240)
+    "curve" ($cfg.flowchart.curve | default "basis")
+-}}
+{{- with $cfg.flowchart.nodeSpacing }}{{ $flowchart = merge $flowchart (dict "nodeSpacing" .) }}{{ end -}}
+{{- with $cfg.flowchart.rankSpacing }}{{ $flowchart = merge $flowchart (dict "rankSpacing" .) }}{{ end -}}
+{{- with $cfg.flowchart.padding }}{{ $flowchart = merge $flowchart (dict "padding" .) }}{{ end -}}
 {{- $jsConfig := dict
     "transparentBackground" ($cfg.transparentBackground | default false)
     "lightTheme"            ($cfg.lightTheme | default "default")
@@ -35,14 +42,7 @@
         "noteMargin" ($cfg.sequence.noteMargin | default 8)
         "messageMargin" ($cfg.sequence.messageMargin | default 40)
     )
-    "flowchart" (dict
-        "nodeSpacing" ($cfg.flowchart.nodeSpacing | default 24)
-        "rankSpacing" ($cfg.flowchart.rankSpacing | default 32)
-        "padding" ($cfg.flowchart.padding | default 14)
-        "fontSize" ($cfg.flowchart.fontSize | default 15)
-        "wrappingWidth" ($cfg.flowchart.wrappingWidth | default 128)
-        "curve" ($cfg.flowchart.curve | default "linear")
-    )
+    "flowchart" $flowchart
 -}}
 {{- with $cfg.maxTextSize }}{{ $jsConfig = merge $jsConfig (dict "maxTextSize" .) }}{{ end -}}
 {{- with $cfg.maxEdges }}{{ $jsConfig = merge $jsConfig (dict "maxEdges" .) }}{{ end -}}

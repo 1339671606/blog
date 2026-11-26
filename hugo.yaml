@@ -27,7 +27,7 @@ params:
       lightTheme: base
       darkTheme: base
       transparentBackground: true
-      fontFamily: '"Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif'
+      fontFamily: '"PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif'
       fontSize: 16
       sequence:
         width: 156
@@ -36,12 +36,8 @@ params:
         noteMargin: 8
         messageMargin: 40
       flowchart:
-        nodeSpacing: 24
-        rankSpacing: 32
-        padding: 14
-        wrappingWidth: 128
-        fontSize: 15
-        curve: linear
+        wrappingWidth: 240
+        curve: basis
   widgets:
     homepage:
       - type: categories
