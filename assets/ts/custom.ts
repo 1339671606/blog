@@ -48,6 +48,9 @@ function setupReaderMode() {
         }
     };
     toggle.addEventListener("click", () => setMode(!focused()));
+    document.querySelectorAll<HTMLButtonElement>("[data-reader-exit]").forEach(button => {
+        button.addEventListener("click", () => setMode(false));
+    });
     document.addEventListener("keydown", event => {
         if (event.key !== "Escape" || !focused() || document.querySelector(".pswp--open, .reading-drawer[open]")) return;
         const target = event.target as HTMLElement | null;
@@ -65,19 +68,27 @@ function setupReaderMode() {
 }
 
 function setupSchemeButton() {
-    const button = document.querySelector<HTMLButtonElement>("button#dark-mode-toggle");
-    if (!button) return;
-    const visibleLabel = button.querySelector<HTMLElement>(".scheme-toggle-label");
+    const primary = document.querySelector<HTMLButtonElement>("button#dark-mode-toggle");
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>("button.scheme-toggle")];
+    if (!buttons.length) return;
     const sync = () => {
         const dark = document.documentElement.dataset.scheme === "dark";
         const label = dark ? "切换为浅色模式" : "切换为暗色模式";
-        if (visibleLabel) {
-            visibleLabel.textContent = dark ? "浅色模式" : "暗色模式";
+        for (const button of buttons) {
+            const visibleLabel = button.querySelector<HTMLElement>(".scheme-toggle-label");
+            if (visibleLabel) {
+                visibleLabel.textContent = dark ? "浅色模式" : "暗色模式";
+            }
+            button.setAttribute("aria-pressed", String(dark));
+            button.setAttribute("aria-label", label);
+            button.title = label;
         }
-        button.setAttribute("aria-pressed", String(dark));
-        button.setAttribute("aria-label", label);
-        button.title = label;
     };
+    buttons.forEach(button => {
+        if (button.hasAttribute("data-scheme-proxy")) {
+            button.addEventListener("click", () => primary?.click());
+        }
+    });
     window.addEventListener("onColorSchemeChange", sync);
     sync();
 }

@@ -9,6 +9,12 @@
         <button type="button" class="reader-mode-toggle" data-reader-toggle data-reader-key="{{ printf "proli:%s:reader-mode:v1" $Page.Site.Home.RelPermalink }}" aria-controls="site-navigation" aria-pressed="false" title="收起左侧导航，扩大正文">
             <span aria-hidden="true">{{ partial "helper/icon" "reader" }}</span><span data-reader-label>沉浸阅读</span>
         </button>
+        {{ if $Page.Site.Params.colorScheme.toggle }}
+        <button type="button" class="scheme-toggle reader-scheme-toggle" data-scheme-proxy aria-label="切换为暗色模式" title="切换为暗色模式" aria-pressed="false">
+            <span class="scheme-icon scheme-icon-moon" aria-hidden="true">{{ partial "helper/icon" "scheme-moon" }}</span>
+            <span class="scheme-icon scheme-icon-sun" aria-hidden="true">{{ partial "helper/icon" "scheme-sun" }}</span>
+        </button>
+        {{ end }}
     </div>
     {{ end }}
     {{ if $Page.Params.categories }}

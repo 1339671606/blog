@@ -3,6 +3,7 @@
     <button type="button" data-reading-top aria-label="回到顶部"><span aria-hidden="true">↑</span><span>顶部</span></button>
     {{ with .GetTerms "categories" }}<button type="button" data-reading-open="notes" aria-label="打开同类笔记" aria-haspopup="dialog" aria-controls="related-notes-dialog"><span aria-hidden="true">↔</span><span>同类</span></button>{{ end }}
     {{ if .Scratch.Get "TOCEnabled" }}<button type="button" data-reading-toc aria-label="查看文章目录"><span aria-hidden="true">☷</span><span>目录</span></button>{{ end }}
+    <button type="button" class="reading-tools-exit-focus" data-reader-exit aria-label="退出沉浸阅读" title="恢复左侧导航（Esc）"><span aria-hidden="true">{{ partial "helper/icon" "reader" }}</span><span>退出沉浸</span></button>
 </nav>
 {{ partial "article/components/reading-drawers" . }}
 {{- end -}}

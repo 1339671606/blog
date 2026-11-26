@@ -80,8 +80,5 @@
     .reading-drawer-scroll { padding-inline: 22px; }
     .reading-drawer-filters { padding-inline: 22px; }
     .search-reading-hint { top: 8px; gap: 8px; margin-inline: 16px; font-size: 1.15rem; }
-    html[data-reader-mode=focus] .search-reading-hint { top: 62px; }
-    html[data-reader-mode=focus] .article-content :is(h1,h2,h3,h4,h5,h6)[id] { scroll-margin-top: 76px; }
-    html[data-reader-mode=focus] .search-reading-hint + .main-article .article-content [id] { scroll-margin-top: 150px; }
 }
 @media print { .reading-drawer, .reading-context-trigger, .article-series, .search-reading-hint { display: none !important; } }
