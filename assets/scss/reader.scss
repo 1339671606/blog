@@ -33,9 +33,10 @@
 
 html[data-reader-mode="focus"] .article-page {
     --reader-layout-width: 1480px;
+    --reader-top-right: unquote("max(20px, calc((100% - var(--reader-layout-width)) / 2 + var(--container-padding)))");
 
     .main-container.extended {
-        --left-sidebar-max-width: 44px;
+        --left-sidebar-max-width: 0px;
         gap: 24px;
 
         @include respond(lg) {
@@ -60,20 +61,26 @@ html[data-reader-mode="focus"] .article-page {
         }
     }
     .left-sidebar {
-        width: 44px; max-width: 44px; height: 100vh; height: 100dvh; flex-basis: 44px; gap: 0;
+        width: 0; max-width: 0; height: 0; flex-basis: 0; padding: 0; margin: 0; gap: 0;
+        overflow: visible; pointer-events: none;
         > header, > .menu-social, > .hamburger { display: none; }
         #main-menu {
-            display: flex !important; flex-direction: column; flex: 1; gap: 0; margin: 0; padding: 0;
+            display: block !important; width: 0; height: 0; margin: 0; padding: 0;
             background: transparent; box-shadow: none; overflow: visible;
             > li:not(.menu-bottom-section) { display: none; }
-            .menu-bottom-section { margin: auto 0 0; }
-            .menu-bottom-section > .menu { padding: 0; gap: 0; margin: 0; }
+            .menu-bottom-section, .menu-bottom-section > .menu { margin: 0; padding: 0; }
             #i18n-switch { display: none; }
         }
+        #dark-mode-toggle.scheme-toggle {
+            position: fixed; top: 12px; right: var(--reader-top-right); z-index: 40;
+            width: 38px; height: 38px; min-height: 38px; padding: 8px;
+            box-shadow: var(--shadow-l1); pointer-events: auto;
+        }
+        #dark-mode-toggle.scheme-toggle svg { width: 19px; height: 19px; }
     }
     .reader-mode-toggle {
         position: fixed; top: 12px; z-index: 40;
-        right: unquote("max(20px, calc((100% - var(--reader-layout-width)) / 2 + var(--container-padding)))");
+        right: calc(var(--reader-top-right) + 46px);
         box-shadow: var(--shadow-l1); color: var(--cl-accent-color);
     }
     .article-reader-toolbar { margin-bottom: 4px; }
@@ -81,14 +88,15 @@ html[data-reader-mode="focus"] .article-page {
 @media (max-width: 767px) {
     .article-reader-toolbar { margin-top: -6px; }
     html[data-reader-mode="focus"] .article-page {
+        --reader-top-right: 12px;
         .main-container.extended { padding-top: 64px; }
         .left-sidebar {
-            position: fixed; top: 12px; left: 12px; z-index: 40; height: 44px; width: 44px;
-            max-height: 44px; padding: 0; margin: 0;
-            #main-menu { margin: 0; padding: 0; }
-            #main-menu .menu-bottom-section { margin: 0; }
+            position: static; width: 0; height: 0; max-height: 0; padding: 0; margin: 0;
+            #dark-mode-toggle.scheme-toggle {
+                top: 12px; right: 12px; width: 40px; height: 40px; min-height: 40px;
+            }
         }
-        .reader-mode-toggle { top: 12px; right: 12px; min-height: 40px; }
+        .reader-mode-toggle { top: 12px; right: 60px; min-height: 40px; }
     }
 }
 @media print {

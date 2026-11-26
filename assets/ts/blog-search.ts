@@ -4,9 +4,17 @@ interface SearchEntry {
     title: string; permalink: string; content: string; prose: string;
     date: string; dateLabel: string; draft: boolean; categories: string[]; tags: string[];
 }
+function escapeRegExp(text: string): string {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function queryTerms(query: string): string[] {
+    return [...new Set(query.trim().split(/\s+/).filter(Boolean))];
+}
 function patternFor(query: string): RegExp {
-    const terms = query.trim().split(/\s+/).filter(Boolean);
-    return new RegExp(terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "gi");
+    return new RegExp(queryTerms(query).map(escapeRegExp).join("|"), "gi");
+}
+function termPatternsFor(query: string): RegExp[] {
+    return queryTerms(query).map(term => new RegExp(escapeRegExp(term), "gi"));
 }
 function countMatches(text: string, pattern: RegExp): number {
     return [...text.matchAll(pattern)].length;
@@ -90,12 +98,14 @@ function renderSearchEntry(entry: SearchEntry, pattern: RegExp, query: string): 
 function setupSearch(root: HTMLElement) {
     const form = root.querySelector<HTMLFormElement>("form")!;
     const input = form.querySelector<HTMLInputElement>("input")!;
+    const clearBtn = form.querySelector<HTMLButtonElement>("[data-search-clear]");
     const results = root.querySelector<HTMLElement>("[data-search-results]")!;
     const status = root.querySelector<HTMLElement>("[data-search-status]")!;
     const empty = root.querySelector<HTMLElement>("[data-search-empty]")!;
     let index: Promise<SearchEntry[]> | undefined;
     let revision = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const syncClear = () => { if (clearBtn) clearBtn.hidden = input.value.length === 0; };
     const getIndex = () => {
         if (!index) {
             index = fetch(form.dataset.json!)
@@ -106,6 +116,7 @@ function setupSearch(root: HTMLElement) {
         return index;
     };
     const search = async (updateURL = true) => {
+        syncClear();
         const query = input.value.trim();
         const current = ++revision;
         if (updateURL) {
@@ -121,14 +132,23 @@ function setupSearch(root: HTMLElement) {
             const data = await getIndex();
             if (current !== revision) return;
             const pattern = patternFor(query);
-            const matches = data.map(entry => ({
-                entry,
-                score: countMatches(entry.title, pattern) * 10
-                    + countMatches((entry.categories || []).concat(entry.tags || []).join(" "), pattern) * 5
-                    + countMatches(entry.content, pattern)
-            })).filter(result => result.score > 0).sort((a, b) => b.score - a.score);
+            const termPatterns = termPatternsFor(query);
+            const matches = data.map(entry => {
+                const taxonomy = (entry.categories || []).concat(entry.tags || []).join(" ");
+                const haystack = `${entry.title}\n${taxonomy}\n${entry.content}`;
+                const allMatched = termPatterns.every(term => countMatches(haystack, term) > 0);
+                if (!allMatched) return { entry, score: 0 };
+                return {
+                    entry,
+                    score: countMatches(entry.title, pattern) * 10
+                        + countMatches(taxonomy, pattern) * 5
+                        + countMatches(entry.content, pattern),
+                };
+            }).filter(result => result.score > 0).sort((a, b) => b.score - a.score);
             for (const result of matches) results.append(renderSearchEntry(result.entry, pattern, query));
-            status.textContent = matches.length ? "找到 " + matches.length + " 篇笔记" : "没有找到匹配结果";
+            status.textContent = matches.length
+                ? "找到 " + matches.length + " 篇笔记"
+                : (termPatterns.length > 1 ? "没有同时包含所有关键词的笔记" : "没有找到匹配结果");
             empty.hidden = matches.length > 0;
         } catch {
             if (current === revision) status.textContent = "搜索暂时不可用，请刷新页面后再试。";
@@ -139,18 +159,37 @@ function setupSearch(root: HTMLElement) {
         clearTimeout(timer);
         void search();
     });
+    clearBtn?.addEventListener("click", () => {
+        clearTimeout(timer);
+        input.value = "";
+        syncClear();
+        void search();
+        input.focus();
+    });
     const schedule = () => {
+        syncClear();
         clearTimeout(timer);
         timer = setTimeout(() => { void search(); }, 160);
     };
-    input.addEventListener("input", event => { if (!(event as InputEvent).isComposing) schedule(); });
+    input.addEventListener("input", event => { if (!(event as InputEvent).isComposing) schedule(); else syncClear(); });
     input.addEventListener("compositionend", schedule);
+    input.addEventListener("keydown", event => {
+        if (event.key === "Escape" && input.value) {
+            event.preventDefault();
+            clearTimeout(timer);
+            input.value = "";
+            syncClear();
+            void search();
+        }
+    });
     window.addEventListener("popstate", () => {
         clearTimeout(timer);
         input.value = new URL(window.location.href).searchParams.get("keyword") || "";
+        syncClear();
         void search(false);
     });
     input.value = new URL(window.location.href).searchParams.get("keyword") || "";
+    syncClear();
     void search(false);
 }
 function initSearch() {

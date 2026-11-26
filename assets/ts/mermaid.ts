@@ -30,6 +30,8 @@ const MEASUREMENT_CSS = [
     'foreignObject > div { white-space: break-spaces !important; word-break: keep-all; overflow-wrap: anywhere; }',
     '.node foreignObject > div { max-width: 240px !important; }',
     '.nodeLabel p, .edgeLabel p { margin: 0 !important; }',
+    '.edgeLabel, .labelBkg { opacity: 1 !important; }',
+    '.edgeLabel .labelBkg { padding: 0 4px; border-radius: 3px; }',
 ].join('\n');
 
 function getScheme(): Scheme {
@@ -208,6 +210,16 @@ async function renderOffscreen(sources: string[]): Promise<string[]> {
     }
 }
 
+function syncScrollState(el: HTMLElement) {
+    const wrapper = el.closest('.mermaid-wrapper');
+    if (!wrapper) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const scrollable = maxScroll > 6;
+    wrapper.classList.toggle('is-scrollable', scrollable);
+    wrapper.classList.toggle('can-scroll-left', scrollable && el.scrollLeft > 4);
+    wrapper.classList.toggle('can-scroll-right', scrollable && el.scrollLeft < maxScroll - 4);
+}
+
 function setupWrappers(elements: NodeListOf<HTMLElement>) {
     elements.forEach((el, idx) => {
         const wrapper = document.createElement('div');
@@ -216,8 +228,9 @@ function setupWrappers(elements: NodeListOf<HTMLElement>) {
         wrapper.appendChild(el);
         wrapper.insertAdjacentHTML(
             'beforeend',
-            `<div class="mermaid-toolbar"><button type="button" data-idx="${idx}" title="放大图表并拖动、缩放">放大查看</button></div>`,
+            `<div class="mermaid-toolbar"><span class="mermaid-scroll-hint" aria-hidden="true">↔ 可左右滑动</span><button type="button" data-idx="${idx}" title="放大图表并拖动、缩放">放大查看</button></div>`,
         );
+        el.addEventListener('scroll', () => syncScrollState(el), { passive: true });
     });
 }
 
@@ -372,8 +385,16 @@ export async function initMermaidPage(config: MermaidConfig) {
             el.dataset.processed = 'true';
             el.dataset.mermaidReady = 'true';
             applyTransparency(el, i);
+            syncScrollState(el);
         });
     };
+
+    const syncAll = () => elements.forEach(syncScrollState);
+    window.addEventListener('resize', syncAll, { passive: true });
+    if (typeof ResizeObserver !== 'undefined') {
+        const observer = new ResizeObserver(syncAll);
+        elements.forEach(el => observer.observe(el));
+    }
 
     window.addEventListener('onColorSchemeChange', () => {
         showScheme(getScheme()).catch(error => console.error('Mermaid theme change:', error));

@@ -42,9 +42,26 @@
 .reading-tools button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 38px; min-width: 54px; padding: 7px 10px; border: 0; border-radius: 7px; color: var(--cl-control-text-color); background: transparent; font: 1.2rem var(--cl-font-ui); cursor: pointer; }
 .reading-tools button:hover { color: var(--cl-accent-color); background: var(--cl-quote-bg-color); }
 .reading-tools button:focus-visible { outline: 2px solid var(--cl-accent-color); outline-offset: 2px; }
+@media (min-width: 1024px) {
+    .reading-tools [data-reading-toc] { display: none; }
+}
 .blog-search { min-width: 0; }
 .blog-search [hidden] { display: none !important; }
 .blog-search-form { margin: 0; border: 1px solid var(--cl-border-color); border-radius: 12px; overflow: hidden; box-shadow: none; }
+.blog-search-form input { padding-inline-end: 108px; }
+.blog-search-form input::-webkit-search-cancel-button,
+.blog-search-form input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+.blog-search-form .blog-search-submit { inset-inline-end: 0; width: 58px; }
+.blog-search-form .blog-search-clear {
+    position: absolute; inset-inline-end: 60px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; padding: 0; border: 1px solid var(--cl-border-color); border-radius: 50%;
+    background: var(--cl-quote-bg-color); color: var(--cl-control-text-color);
+    display: inline-flex; align-items: center; justify-content: center;
+    font: 400 1.8rem/1 var(--cl-font-ui); cursor: pointer;
+    transition: color .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.blog-search-form .blog-search-clear:hover { color: var(--cl-accent-color); border-color: var(--cl-accent-color); background: var(--cl-bg-color); }
+.blog-search-form .blog-search-clear:focus-visible { outline: 2px solid var(--cl-accent-color); outline-offset: 2px; }
 .blog-search-help { margin: 11px 0 0; color: var(--cl-control-text-color); font-size: 1.15rem; line-height: 1.7; }
 .blog-search-status { margin: 25px 0 13px; color: var(--cl-control-text-color); font-size: 1.25rem; }
 .blog-search-results { display: grid; gap: 13px; }

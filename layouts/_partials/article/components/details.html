@@ -66,10 +66,15 @@
             </div>
         {{ end }}
 
-        {{ if and (not $IsList) $Page.Params.lastmod (not $Page.Lastmod.IsZero) }}
+        {{- $publishedDay := $Page.Date.Format "2006-01-02" -}}
+        {{- $updatedDay := $Page.Lastmod.Format "2006-01-02" -}}
+        {{- $showUpdated := and (not $IsList) $Page.Params.lastmod (not $Page.Lastmod.IsZero) (or $Page.Date.IsZero (gt $updatedDay $publishedDay)) -}}
+        {{ if $showUpdated }}
             <div class="inline-meta article-updated">
-                {{ partial "helper/icon" "clock" }}
-                <time class="article-time--updated" datetime="{{ $Page.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">最后更新：{{ $Page.Lastmod | time.Format $Page.Site.Params.dateFormat.lastUpdated }}</time>
+                <span class="article-meta-item">
+                    {{ partial "helper/icon" "clock" }}
+                    <time class="article-time--updated" datetime="{{ $Page.Lastmod.Format "2006-01-02T15:04:05Z07:00" }}">最后更新：{{ $Page.Lastmod | time.Format $Page.Site.Params.dateFormat.lastUpdated }}</time>
+                </span>
             </div>
         {{ end }}
 

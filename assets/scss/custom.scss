@@ -327,16 +327,58 @@ body {
         }
     }
 
+    .codeblock-plain {
+        position: relative;
+        margin-top: 14px;
+        margin-bottom: 18px;
+        max-width: 100%;
+        min-width: 0;
+
+        > pre {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    }
+
     .copyCodeButton {
         top: 8px;
         right: 8px;
-        padding: 5px 9px;
-        color: var(--cl-control-text-color);
-        background: var(--cl-bg-color);
-        border: 1px solid var(--cl-code-border-color);
+        padding: 5px 10px;
+        color: var(--cl-text-color);
+        background: var(--cl-quote-bg-color);
+        border: 1px solid var(--cl-quote-border-color);
         border-radius: 6px;
-        font: 1.2rem var(--cl-font-ui);
-        box-shadow: none;
+        font: 500 1.2rem/1.4 var(--cl-font-ui);
+        box-shadow: var(--shadow-l1);
+        opacity: 0.72;
+        transition: opacity 0.18s ease, color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+
+        &:hover,
+        &:focus-visible {
+            opacity: 1;
+            color: var(--cl-accent-color);
+            border-color: var(--cl-accent-color);
+            background: var(--cl-bg-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--cl-accent-color);
+            outline-offset: 2px;
+        }
+
+        &.is-copied {
+            opacity: 1;
+            color: var(--cl-accent-color);
+            border-color: var(--cl-accent-color);
+            background: var(--cl-bg-color);
+        }
+    }
+
+    .highlight:hover .copyCodeButton,
+    .codeblock-plain:hover .copyCodeButton,
+    .highlight:focus-within .copyCodeButton,
+    .codeblock-plain:focus-within .copyCodeButton {
+        opacity: 1;
     }
 
     .table-wrapper {

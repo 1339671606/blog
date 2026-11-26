@@ -3,9 +3,10 @@
 <div class="blog-search" data-blog-search>
     <form action="{{ .RelPermalink }}" class="search-form blog-search-form" data-json="{{ (.OutputFormats.Get "json").RelPermalink }}" role="search">
         <p><label for="blog-search-query">搜索关键词</label><input id="blog-search-query" name="keyword" type="search" placeholder="输入文章标题、命令或报错信息" autocomplete="off" aria-describedby="blog-search-help"></p>
-        <button type="submit" title="搜索" aria-label="搜索">{{ partial "helper/icon" "search" }}</button>
+        <button type="button" class="blog-search-clear" data-search-clear title="清空关键词" aria-label="清空关键词" hidden>×</button>
+        <button type="submit" class="blog-search-submit" title="搜索" aria-label="搜索">{{ partial "helper/icon" "search" }}</button>
     </form>
-    <p class="blog-search-help" id="blog-search-help">可用空格分开多个关键词。命令和代码示例也能搜索。</p>
+    <p class="blog-search-help" id="blog-search-help">可用空格分开多个关键词（同时匹配所有词），按 / 或 Ctrl+K 可快速搜索。</p>
     <p class="blog-search-status" role="status" aria-live="polite" data-search-status>输入关键词开始搜索。</p>
     <div class="blog-search-results" data-search-results></div>
     <section class="blog-search-empty" data-search-empty hidden>

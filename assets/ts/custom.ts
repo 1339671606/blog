@@ -82,7 +82,87 @@ function setupSchemeButton() {
     sync();
 }
 
-function setupProjectUI() { setupReadingNavigation(); setupReadingTools(); setupReaderMode(); setupSchemeButton(); setupSearchTarget(); }
+function setupSearchShortcut() {
+    document.addEventListener("keydown", event => {
+        if (event.defaultPrevented || event.isComposing) return;
+        const target = event.target as HTMLElement | null;
+        if (target?.closest("input, textarea, select, [contenteditable=true]")) return;
+        if (document.querySelector(".pswp--open, .reading-drawer[open], .mermaid-modal.active")) return;
+
+        const isSlash = event.key === "/" && !event.ctrlKey && !event.metaKey && !event.altKey;
+        const isModK = event.key.toLowerCase() === "k" && (event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey;
+        if (!isSlash && !isModK) return;
+
+        const searchInput = document.querySelector<HTMLInputElement>("#blog-search-query");
+        if (searchInput) {
+            event.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+            return;
+        }
+        const searchUrl =
+            document.querySelector<HTMLElement>(".reading-tools")?.dataset.searchUrl
+            || document.querySelector<HTMLAnchorElement>("#main-menu a[href*='/search']")?.href;
+        if (searchUrl) {
+            event.preventDefault();
+            window.location.href = searchUrl;
+        }
+    });
+}
+
+function setupCodeCopyEnhancements() {
+    const markCopied = (button: HTMLButtonElement, restoreText?: string) => {
+        const timerId = Number(button.dataset.copiedTimer || 0);
+        if (timerId) window.clearTimeout(timerId);
+        button.classList.add("is-copied");
+        if (restoreText !== undefined) button.textContent = "已复制";
+        const nextTimer = window.setTimeout(() => {
+            button.classList.remove("is-copied");
+            if (restoreText !== undefined) button.textContent = restoreText;
+            delete button.dataset.copiedTimer;
+        }, 1200);
+        button.dataset.copiedTimer = String(nextTimer);
+    };
+
+    document.addEventListener("click", event => {
+        const button = (event.target as HTMLElement | null)?.closest<HTMLButtonElement>(".article-content .highlight .copyCodeButton");
+        if (button) markCopied(button);
+    });
+
+    if (!navigator.clipboard) return;
+    document.querySelectorAll<HTMLPreElement>(".article-content pre:not(.mermaid)").forEach(pre => {
+        if (pre.closest(".highlight, .codeblock-plain")) return;
+        const code = pre.querySelector("code");
+        const source = (code?.textContent ?? pre.textContent ?? "").trim();
+        if (!source) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "codeblock-plain";
+        pre.parentNode!.insertBefore(wrapper, pre);
+        wrapper.appendChild(pre);
+
+        const copyButton = document.createElement("button");
+        copyButton.type = "button";
+        copyButton.className = "copyCodeButton";
+        copyButton.textContent = "复制";
+        copyButton.addEventListener("click", () => {
+            navigator.clipboard.writeText(code?.textContent ?? pre.textContent ?? "")
+                .then(() => markCopied(copyButton, "复制"))
+                .catch(err => console.error("Copy failed:", err));
+        });
+        wrapper.appendChild(copyButton);
+    });
+}
+
+function setupProjectUI() {
+    setupReadingNavigation();
+    setupReadingTools();
+    setupReaderMode();
+    setupSchemeButton();
+    setupSearchTarget();
+    setupSearchShortcut();
+    setupCodeCopyEnhancements();
+}
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setupProjectUI);
 else setupProjectUI();
 export {};
