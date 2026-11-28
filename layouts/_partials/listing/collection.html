@@ -1,5 +1,6 @@
 {{- $isTaxonomy := eq .Kind "taxonomy" -}}
 {{- $isTerm := eq .Kind "term" -}}
+{{- $numbered := and $isTerm (eq .Data.Plural "categories") -}}
 {{- $unit := "篇笔记" -}}
 {{- $overline := "FIELD NOTES / NOTES" -}}
 {{- if $isTaxonomy -}}
@@ -34,10 +35,12 @@
             {{ end }}
         </section>
         {{ else }}
-        <section class="collection-note-list" aria-label="文章列表">
-            {{ range $paginator.Pages }}
+        {{- $offset := mul (sub $paginator.PageNumber 1) $paginator.PagerSize -}}
+        <section class="collection-note-list{{ if $numbered }} collection-note-list--numbered{{ end }}" aria-label="文章列表">
+            {{ range $index, $entry := $paginator.Pages }}
             <article>
                 <a class="collection-note" href="{{ .RelPermalink }}">
+                    {{ if $numbered }}<span class="collection-note-number">{{ printf "%02d" (add $offset (add $index 1)) }}</span>{{ end }}
                     <div class="collection-note-main">
                         <h2>{{ .Title }}</h2>
                         <div class="collection-note-meta">

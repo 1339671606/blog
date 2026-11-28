@@ -12,4 +12,8 @@
     {{- if eq (len $pages) 0 -}}{{- $pages = $subsections -}}{{- end -}}
 {{- end -}}
 {{- $pages = partial "helper/pages-sort.html" (dict "Pages" $pages "Context" .) -}}
+{{/* Learning categories use the same weighted order as the related-notes drawer. */}}
+{{- if and (eq .Kind "term") (eq .Data.Plural "categories") -}}
+    {{- $pages = $pages.ByWeight -}}
+{{- end -}}
 {{- return $pages -}}

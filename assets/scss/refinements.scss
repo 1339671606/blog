@@ -26,6 +26,12 @@
 .collection-draft { padding: 1px 6px; border-radius: 4px; background: var(--cl-quote-bg-color); color: var(--cl-control-text-color); font-size: 1rem; }
 .collection-note-description { margin: 10px 0 0; font-size: 1.2rem; color: var(--cl-control-text-color); line-height: 1.7; }
 .collection-note-arrow { flex-shrink: 0; color: var(--cl-accent-color); font-size: 2rem; }
+/* Category numbers align with the title's first line, while dates stay under the title. */
+.collection-note-list--numbered {
+    .collection-note { display: grid; grid-template-columns: minmax(2.6rem, max-content) minmax(0, 1fr) auto; column-gap: 16px; align-items: start; }
+    .collection-note-number { color: var(--cl-control-text-color); font: 400 1.2rem/3rem var(--cl-font-mono); font-variant-numeric: tabular-nums; }
+    .collection-note-arrow { align-self: center; }
+}
 .collection-subsections { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
 .collection-subsections a { padding: 9px 13px; border: 1px solid var(--cl-border-color); border-radius: 8px; color: var(--cl-accent-color); font-size: 1.25rem; }
 .collection-empty { padding: 28px; border: 1px dashed var(--cl-border-color); border-radius: 12px; background: var(--cl-bg-color); }
@@ -92,6 +98,10 @@
     .collection-term-top h2 { font-size: 1.9rem; }
     .collection-note { padding: 20px 18px; gap: 14px; }
     .collection-note h2 { font-size: 1.9rem; }
+    .collection-note-list--numbered {
+        .collection-note { grid-template-columns: minmax(2.2rem, max-content) minmax(0, 1fr) auto; column-gap: 12px; }
+        .collection-note-number { font-size: 1.1rem; line-height: 2.85rem; }
+    }
     .collection-note-meta { font-size: 1.05rem; }
     .reading-tools { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); gap: 3px; padding: 4px; }
     .reading-tools button { min-height: 38px; padding: 7px 9px; font-size: 1.15rem; }
