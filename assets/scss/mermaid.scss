@@ -388,30 +388,31 @@
     right: 0;
     display: flex;
     align-items: center;
-    gap: 8px;
-
-    .mermaid-scroll-hint {
-        display: none;
-        align-items: center;
-        padding: 4px 8px;
-        border-radius: 6px;
-        background: var(--cl-quote-bg-color);
-        color: var(--cl-control-text-color);
-        font: 400 11.5px/1.4 var(--cl-font-ui);
-        user-select: none;
-    }
 
     button {
-        padding: 6px 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
         border: 1px solid var(--cl-border-color);
-        border-radius: 7px;
+        border-radius: 8px;
         background: var(--cl-bg-color);
         color: var(--cl-control-text-color);
         box-shadow: none;
-        font: 400 12px/1.5 var(--cl-font-ui);
-        transition: color .15s ease, border-color .15s ease;
+        opacity: 0.72;
+        transition: opacity .15s ease, color .15s ease, border-color .15s ease, background-color .15s ease;
 
-        &:hover {
+        svg {
+            display: block;
+            width: 16px;
+            height: 16px;
+        }
+
+        &:hover,
+        &:focus-visible {
+            opacity: 1;
             color: var(--cl-accent-color);
             background: var(--cl-quote-bg-color);
             border-color: var(--cl-accent-color);
@@ -420,8 +421,8 @@
     }
 }
 
-.mermaid-wrapper.is-scrollable .mermaid-scroll-hint {
-    display: inline-flex;
+.mermaid-wrapper:hover .mermaid-toolbar button {
+    opacity: 1;
 }
 
 .mermaid-modal {

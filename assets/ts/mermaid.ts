@@ -25,6 +25,7 @@ interface MermaidConfig {
 type Scheme = 'light' | 'dark';
 
 const PANZOOM_CDN = 'https://cdn.jsdelivr.net/npm/panzoom@9.4.3/+esm';
+const ZOOM_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5"/><path d="M15 4h5v5"/><path d="M20 15v5h-5"/><path d="M9 20H4v-5"/></svg>';
 const DEFAULT_FONT_FAMILY = '"PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif';
 const MEASUREMENT_CSS = [
     'foreignObject > div { white-space: break-spaces !important; word-break: keep-all; overflow-wrap: anywhere; }',
@@ -215,7 +216,6 @@ function syncScrollState(el: HTMLElement) {
     if (!wrapper) return;
     const maxScroll = el.scrollWidth - el.clientWidth;
     const scrollable = maxScroll > 6;
-    wrapper.classList.toggle('is-scrollable', scrollable);
     wrapper.classList.toggle('can-scroll-left', scrollable && el.scrollLeft > 4);
     wrapper.classList.toggle('can-scroll-right', scrollable && el.scrollLeft < maxScroll - 4);
 }
@@ -228,7 +228,7 @@ function setupWrappers(elements: NodeListOf<HTMLElement>) {
         wrapper.appendChild(el);
         wrapper.insertAdjacentHTML(
             'beforeend',
-            `<div class="mermaid-toolbar"><span class="mermaid-scroll-hint" aria-hidden="true">↔ 可左右滑动</span><button type="button" data-idx="${idx}" title="放大图表并拖动、缩放">放大查看</button></div>`,
+            `<div class="mermaid-toolbar"><button type="button" data-idx="${idx}" aria-label="放大查看" title="放大查看">${ZOOM_ICON}</button></div>`,
         );
         el.addEventListener('scroll', () => syncScrollState(el), { passive: true });
     });
